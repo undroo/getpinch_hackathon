@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-base: #fbf8fe;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f6f2f8;
+  --border-subtle: #e4e1e7;
+  --border-focus: #5442de;
+  --text-primary: #1b1b1f;
+  --text-secondary: #474555;
+  --text-muted: #787586;
+  --brand-primary: #5442de;
+  --brand-secondary: #006d36;
+
+  --tier-critical-bg: #ffdad6;
+  --tier-critical-border: #ba1a1a;
+  --tier-critical-text: #93000a;
+  --tier-slipping-bg: #ffdcc6;
+  --tier-slipping-border: #934900;
+  --tier-slipping-text: #713700;
+  --tier-healthy-bg: #83fba5;
+  --tier-healthy-border: #006d36;
+  --tier-healthy-text: #00743a;
+  --tier-watch-bg: #f0edf2;
+  --tier-watch-border: #787586;
+  --tier-watch-text: #474555;
+  --tier-unknown-bg: #eae7ed;
+  --tier-unknown-border: #c8c4d8;
+  --tier-unknown-text: #787586;
+
+  --status-applied: #006d36;
+  --status-pending: #934900;
+  --status-failed: #ba1a1a;
+
+  --background: var(--bg-base);
+  --foreground: var(--text-primary);
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border-subtle;
+  }
+
+  body {
+    @apply bg-bg-base text-text-primary antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .bg-surface-gradient {
+    background: linear-gradient(180deg, #fbf8fe 0%, #f0edf2 100%);
+  }
+
+  .tier-critical {
+    background-color: var(--tier-critical-bg);
+    color: var(--tier-critical-text);
+    border-color: var(--tier-critical-border);
+  }
+
+  .tier-slipping {
+    background-color: var(--tier-slipping-bg);
+    color: var(--tier-slipping-text);
+    border-color: var(--tier-slipping-border);
+  }
+
+  .tier-healthy {
+    background-color: var(--tier-healthy-bg);
+    color: var(--tier-healthy-text);
+    border-color: var(--tier-healthy-border);
+  }
+
+  .tier-watch {
+    background-color: var(--tier-watch-bg);
+    color: var(--tier-watch-text);
+    border-color: var(--tier-watch-border);
+  }
+
+  .tier-unknown {
+    background-color: var(--tier-unknown-bg);
+    color: var(--tier-unknown-text);
+    border-color: var(--tier-unknown-border);
+  }
+
+  .glow-critical {
+    box-shadow: 0 0 8px rgba(186, 26, 26, 0.15);
+  }
+
+  .glow-slipping {
+    box-shadow: 0 0 8px rgba(147, 73, 0, 0.12);
+  }
+}
