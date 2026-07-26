@@ -55,7 +55,6 @@ export default async function OverviewPage() {
             {attentionCount} expected to leave
           </p>
         </div>
-        <div className="text-xs text-text-muted">Scored on demand</div>
       </div>
 
       <OverviewDashboard

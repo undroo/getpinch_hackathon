@@ -34,6 +34,7 @@ Configured in `apps/api/.env` (secrets stay in `.env` — do not commit).
 | `PINCH_HOLD_PLAN_ID` | `pln_5QvgWJa0BRHvI7` | RetainIQ+ Hold / Flex v1 ($10/mo base) |
 | `PINCH_PAYER_SARAH` | `pyr_Uo8cU03lDnqupk` | Sarah Chen |
 | `PINCH_PAYER_MARCUS` | `pyr_Mtt2mQwHjxGpDK` | Marcus Webb |
+| `PINCH_PAYER_AVERY` | `pyr_fFZuCmwXVmcNiX` | Avery Davis |
 
 Re-run sandbox wiring if IDs drift:
 
@@ -75,7 +76,23 @@ Created by `setup_pinch_sandbox.py` for bulk critical/slipping coverage. All hav
 
 | Name | Risk tier | Phone | Member ID | Pinch payer | Send status |
 |---|---|---|---|---|---|
-| Avery Davis | Critical | `+61400000007` | `25a6d34c-46bc-4a4d-984e-121d47aeb9dd` | `pyr_EuUGFpe2KJXCOE` | Available |
+| Avery Davis | Critical | `+61400000007` | `25a6d34c-46bc-4a4d-984e-121d47aeb9dd` | `pyr_fFZuCmwXVmcNiX` | Available |
+
+**Avery Davis — expected metrics (fixed demo persona)**
+
+| Metric | Value |
+|---|---|
+| Days since last visit | ~37 |
+| Churn probability | ~90% |
+| Expected leave | **2 mo** |
+| Flex stay | ~12 mo |
+| Flex structure | $10/wk + $6.67/visit (cap $35/wk) |
+| Expected bill | ~$16.67/wk at 1 visit/wk |
+| LTV | ~$260 |
+| 12-mo value improvement | ~$555 |
+
+Direct link: http://localhost:3000/members/25a6d34c-46bc-4a4d-984e-121d47aeb9dd
+
 | Blake Rodriguez | Critical | `+61400000008` | `387da4d3-05b1-4737-ad94-86f24e16b1e0` | `pyr_klqNEdgAa6VcXt` | **Already offered** — use another member for a fresh send |
 | Cameron Martinez | Critical | `+61400000009` | `f3efd8a5-b0e1-44d3-8e99-f236892ca625` | `pyr_OVdLuMyJ5JGzzP` | Available |
 | Drew Lee | Slipping | `+61400000010` | `2bd2e347-6dea-4617-998f-66101678d9a6` | `pyr_wic38SgqTH1eWE` | Available |

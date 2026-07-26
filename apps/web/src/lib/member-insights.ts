@@ -168,7 +168,7 @@ export function buildDetailViewModel(detail: MemberDetail): MemberInsight {
         : "Standard",
     successCallout:
       tier === "healthy"
-        ? `Engagement score ${insights.engagement_score}/100 · LTV forecast $${(insights.ltv_cents / 100).toFixed(0)}.`
+        ? `Engagement score ${insights.engagement_score}/100 · CLV forecast $${(insights.ltv_cents / 100).toFixed(0)}.`
         : null,
     monitoringNote:
       !onFlex && (tier === "watch" || tier === "unknown")

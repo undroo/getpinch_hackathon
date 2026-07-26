@@ -21,6 +21,7 @@ from app.services.value_projection import projection_from_breakdown
 SARAH_ID = uuid.UUID("11111111-1111-1111-1111-111111111101")
 MARCUS_ID = uuid.UUID("11111111-1111-1111-1111-111111111102")
 JAMIE_ID = uuid.UUID("11111111-1111-1111-1111-111111111103")
+AVERY_ID = uuid.UUID("25a6d34c-46bc-4a4d-984e-121d47aeb9dd")
 
 DEFAULT_MEMBER_COUNT = 407
 TARGET_CRITICAL = 7
@@ -199,13 +200,23 @@ def _persona_members(now: datetime) -> list[MemberRow]:
             status="active",
             joined_at=now - timedelta(days=200),
         ),
+        MemberRow(
+            id=AVERY_ID,
+            name="Avery Davis",
+            email="avery.davis@example.com",
+            phone="+61400000007",
+            pinch_payer_id=settings.pinch_payer_avery or "REPLACE_PAYER_7",
+            membership_plan="standard",
+            status="active",
+            joined_at=now - timedelta(days=200),
+        ),
     ]
 
 
 def _generated_tier_counts(total_count: int) -> dict[str, int]:
-    """Tier counts for generated members (excludes 3 fixed personas)."""
-    gen_total = total_count - 3
-    critical = TARGET_CRITICAL - 1  # Sarah Chen
+    """Tier counts for generated members (excludes 4 fixed personas)."""
+    gen_total = total_count - 4
+    critical = TARGET_CRITICAL - 2  # Sarah Chen + Avery Davis
     slipping = TARGET_SLIPPING - 1  # Marcus Webb
     unknown = TARGET_UNKNOWN if total_count >= DEFAULT_MEMBER_COUNT else max(1, gen_total // 50)
     healthy = gen_total - critical - slipping - unknown
@@ -227,7 +238,7 @@ def _generated_tier_list(total_count: int) -> list[str]:
     tiers: list[str] = []
     for tier in ("critical", "slipping", "healthy", "unknown"):
         tiers.extend([tier] * counts[tier])
-    assert len(tiers) == total_count - 3
+    assert len(tiers) == total_count - 4
     return tiers
 
 
@@ -235,7 +246,11 @@ def _generated_members(now: datetime, total_count: int) -> list[tuple[MemberRow,
     members: list[tuple[MemberRow, str]] = []
     tier_list = _generated_tier_list(total_count)
 
-    for i, tier in enumerate(tier_list, start=4):
+    i = 3
+    for tier in tier_list:
+        i += 1
+        if i == 7:
+            i += 1  # slot reserved for Avery Davis persona
         if tier == "unknown":
             joined_at = now - timedelta(days=10 + (i % 15))
         else:
@@ -283,6 +298,14 @@ def _persona_check_ins(now: datetime) -> list[tuple[uuid.UUID, datetime]]:
     # Jamie Torres: Healthy on flex — regular visits since apply (~6 weeks)
     for n in range(0, 42, 2):
         check_ins.append((JAMIE_ID, now - timedelta(days=n) + timedelta(hours=8)))
+
+    # Avery Davis: Critical — 38 days inactive (~92% churn → leave in 2 months)
+    for visit_day in range(30, 81, 7):
+        hour = _demo_checkin_hour(7, 38 + visit_day)
+        check_ins.append(
+            (AVERY_ID, now - timedelta(days=38 + visit_day) + timedelta(hours=hour))
+        )
+    check_ins.append((AVERY_ID, now - timedelta(days=38) + timedelta(hours=8)))
 
     return check_ins
 
@@ -445,7 +468,12 @@ async def _print_tier_summary(conn: asyncpg.Connection) -> None:
     for tier, count in summary.items():
         print(f"  {tier:10s} {count}")
 
-    personas = {str(SARAH_ID): "Sarah Chen", str(MARCUS_ID): "Marcus Webb", str(JAMIE_ID): "Jamie Torres"}
+    personas = {
+        str(SARAH_ID): "Sarah Chen",
+        str(MARCUS_ID): "Marcus Webb",
+        str(JAMIE_ID): "Jamie Torres",
+        str(AVERY_ID): "Avery Davis",
+    }
     print("\nDemo personas:")
     for row in rows:
         member_id = str(row["id"])
@@ -470,8 +498,8 @@ async def seed_demo_data(
     skip_interventions: bool,
     yes: bool,
 ) -> None:
-    if count < 4:
-        raise SystemExit("--count must be at least 4 (3 personas + 1 generated member).")
+    if count < 5:
+        raise SystemExit("--count must be at least 5 (4 personas + 1 generated member).")
 
     _confirm_reset(yes)
     now = datetime.now(UTC)
@@ -499,7 +527,11 @@ async def seed_demo_data(
             await _insert_members(conn, all_members)
 
             check_ins = _persona_check_ins(now)
-            for i, (member, tier) in enumerate(generated_with_tiers, start=4):
+            i = 3
+            for member, tier in generated_with_tiers:
+                i += 1
+                if i == 7:
+                    i += 1
                 check_ins.extend(_check_ins_for_tier(member, tier, i, now))
 
             print(f"Inserting {len(check_ins)} check-ins...")
@@ -521,7 +553,7 @@ def main() -> None:
         "--count",
         type=int,
         default=DEFAULT_MEMBER_COUNT,
-        help=f"Total member count including 3 demo personas (default: {DEFAULT_MEMBER_COUNT})",
+        help=f"Total member count including 4 demo personas (default: {DEFAULT_MEMBER_COUNT})",
     )
     parser.add_argument(
         "--skip-interventions",

@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   AlertTriangle,
   CheckCircle2,
-  Eye,
   HelpCircle,
   TrendingDown,
 } from "lucide-react";
@@ -17,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import type { AttendanceStats, Member, OverviewSummary, RiskTier } from "@/lib/types";
 
-type TierFilter = RiskTier | "at-risk";
+type TierFilter = Exclude<RiskTier, "watch"> | "at-risk";
 
 const TIER_SECTION: Record<
   TierFilter,
@@ -42,10 +41,6 @@ const TIER_SECTION: Record<
   unknown: {
     title: "Unknown",
     description: "New members or members without enough data",
-  },
-  watch: {
-    title: "Watch",
-    description: "Members to keep an eye on",
   },
 };
 
@@ -78,7 +73,7 @@ export function OverviewDashboard({
   const section = TIER_SECTION[filter];
   const attentionCount = summary.critical + summary.slipping;
 
-  function toggleTier(tier: RiskTier) {
+  function toggleTier(tier: Exclude<RiskTier, "watch">) {
     setFilter((current) => (current === tier ? "at-risk" : tier));
   }
 
@@ -94,55 +89,6 @@ export function OverviewDashboard({
           {error}
         </div>
       )}
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <StatCard
-          label="Critical"
-          value={summary.critical}
-          subtext="Needs action today"
-          icon={AlertTriangle}
-          tier="critical"
-          emphasized
-          selected={filter === "critical"}
-          onClick={() => toggleTier("critical")}
-        />
-        <StatCard
-          label="Slipping"
-          value={summary.slipping}
-          subtext="Likely to leave"
-          icon={TrendingDown}
-          tier="slipping"
-          selected={filter === "slipping"}
-          onClick={() => toggleTier("slipping")}
-        />
-        <StatCard
-          label="Watch"
-          value={summary.watch}
-          subtext="Keep an eye on"
-          icon={Eye}
-          tier="watch"
-          selected={filter === "watch"}
-          onClick={() => toggleTier("watch")}
-        />
-        <StatCard
-          label="Healthy"
-          value={summary.healthy}
-          subtext="Low churn risk"
-          icon={CheckCircle2}
-          tier="healthy"
-          selected={filter === "healthy"}
-          onClick={() => toggleTier("healthy")}
-        />
-        <StatCard
-          label="Unknown"
-          value={summary.unknown}
-          subtext="New / no data"
-          icon={HelpCircle}
-          tier="unknown"
-          selected={filter === "unknown"}
-          onClick={() => toggleTier("unknown")}
-        />
-      </div>
 
       {attendance ? (
         <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -183,6 +129,46 @@ export function OverviewDashboard({
           </Card>
         </section>
       )}
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          label="Critical"
+          value={summary.critical}
+          subtext="Needs action today"
+          icon={AlertTriangle}
+          tier="critical"
+          emphasized
+          selected={filter === "critical"}
+          onClick={() => toggleTier("critical")}
+        />
+        <StatCard
+          label="Slipping"
+          value={summary.slipping}
+          subtext="Likely to leave"
+          icon={TrendingDown}
+          tier="slipping"
+          selected={filter === "slipping"}
+          onClick={() => toggleTier("slipping")}
+        />
+        <StatCard
+          label="Healthy"
+          value={summary.healthy}
+          subtext="Low churn risk"
+          icon={CheckCircle2}
+          tier="healthy"
+          selected={filter === "healthy"}
+          onClick={() => toggleTier("healthy")}
+        />
+        <StatCard
+          label="Unknown"
+          value={summary.unknown}
+          subtext="New / no data"
+          icon={HelpCircle}
+          tier="unknown"
+          selected={filter === "unknown"}
+          onClick={() => toggleTier("unknown")}
+        />
+      </div>
 
       <section className="space-y-4">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">

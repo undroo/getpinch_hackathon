@@ -17,6 +17,7 @@ from app.services.pinch_client import PinchAuthError, PinchClient
 
 SARAH_ID = uuid.UUID("11111111-1111-1111-1111-111111111101")
 MARCUS_ID = uuid.UUID("11111111-1111-1111-1111-111111111102")
+AVERY_ID = uuid.UUID("25a6d34c-46bc-4a4d-984e-121d47aeb9dd")
 
 STANDARD_PLAN_NAME = "RetainIQ+ Standard v1"
 HOLD_PLAN_NAME = "RetainIQ+ Hold v1"
@@ -24,6 +25,7 @@ HOLD_PLAN_NAME = "RetainIQ+ Hold v1"
 DEMO_MEMBERS: list[tuple[uuid.UUID, str, str, str, str]] = [
     (SARAH_ID, "Sarah", "Chen", "sarah.chen@example.com", "+61400101001"),
     (MARCUS_ID, "Marcus", "Webb", "marcus.webb@example.com", "+61400101002"),
+    (AVERY_ID, "Avery", "Davis", "avery.davis@example.com", "+61400000007"),
 ]
 
 
@@ -333,11 +335,13 @@ async def run(*, clear_interventions: bool) -> None:
         print(f"  hold_plan_id:     {hold_plan_id}")
         print(f"  sarah payer:      {payer_map[SARAH_ID]}")
         print(f"  marcus payer:     {payer_map[MARCUS_ID]}")
+        print(f"  avery payer:      {payer_map[AVERY_ID]}")
         print("\nAdd to apps/api/.env to preserve across re-seeds:")
         print(f"PINCH_STANDARD_PLAN_ID={standard_plan_id}")
         print(f"PINCH_HOLD_PLAN_ID={hold_plan_id}")
         print(f"PINCH_PAYER_SARAH={payer_map[SARAH_ID]}")
         print(f"PINCH_PAYER_MARCUS={payer_map[MARCUS_ID]}")
+        print(f"PINCH_PAYER_AVERY={payer_map[AVERY_ID]}")
     except PinchAuthError as exc:
         raise SystemExit(f"Pinch auth failed: {exc}") from exc
     except httpx.HTTPError as exc:

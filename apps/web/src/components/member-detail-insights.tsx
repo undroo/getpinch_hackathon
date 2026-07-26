@@ -96,7 +96,7 @@ export function MemberDetailInsights({
           onSelect={() => setSelectedMetric("engagement")}
         />
         <MemberMetricCard
-          label="LTV Forecast"
+          label="Customer Lifetime Value (CLV)"
           value={formatAUD(insight.ltvCents)}
           sub={
             insight.riskExposureCents != null && insight.riskExposureCents > 0
@@ -192,7 +192,7 @@ function LtvModePanel({
         <CardContent className="space-y-4 p-5 md:p-6">
           <div>
             <p className="text-sm font-medium text-text-primary">
-              Lifetime value outlook
+              Customer lifetime value (CLV) outlook
             </p>
             <p className="mt-0.5 text-xs text-text-muted">
               Dollar impact of retention vs expected churn
@@ -201,7 +201,7 @@ function LtvModePanel({
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <MetricStat
-              label="LTV Forecast"
+              label="CLV Forecast"
               value={formatAUD(insight.ltvCents)}
               sub={
                 insight.riskExposureCents != null &&

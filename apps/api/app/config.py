@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     pinch_hold_plan_id: str = ""
     pinch_payer_sarah: str = ""
     pinch_payer_marcus: str = ""
+    pinch_payer_avery: str = ""
     pinch_webhook_secret: str = ""
     cors_origins: str = "http://localhost:3000"
     demo_gym_name: str = "RetainIQ+ Demo Gym"

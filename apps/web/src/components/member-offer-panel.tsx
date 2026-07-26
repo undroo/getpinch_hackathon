@@ -724,7 +724,7 @@ export function MemberOfferPanel({
             ) : null}
           </div>
           <div className="flex items-baseline justify-between gap-2 border-t border-border-subtle pt-3">
-            <p className="text-xs text-text-muted">Projected LTV</p>
+            <p className="text-xs text-text-muted">Projected CLV</p>
             <p className="text-lg font-bold tabular-nums text-text-primary">
               {formatAUD(insight.ltvCents)}
             </p>
