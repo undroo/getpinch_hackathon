@@ -1,6 +1,6 @@
+import { BarChartColumn } from "@/components/bar-chart-column";
 import { Card, CardContent } from "@/components/ui/card";
 import type { AttendanceDayBucket } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
 function formatDayLabel(isoDate: string): string {
   const d = new Date(`${isoDate}T12:00:00Z`);
@@ -59,51 +59,31 @@ export function OverviewAttendanceChart({
             <div className="h-5" aria-hidden />
           </div>
 
-          <div className="flex min-w-0 flex-1 gap-px sm:gap-0.5">
+          <div className="flex h-full min-w-0 flex-1 gap-px sm:gap-0.5">
             {byDay.map((day, index) => {
-              const height = Math.max(
+              const heightPct = Math.max(
                 day.check_ins > 0 ? 8 : 4,
                 Math.round((day.check_ins / max) * 100),
               );
               const showLabel =
                 index % labelEvery === 0 || index === byDay.length - 1;
+              const dayLabel = formatDayLabel(day.date);
 
               return (
-                <div
+                <BarChartColumn
                   key={day.date}
-                  className="group relative flex h-full min-w-0 flex-1 flex-col"
-                >
-                  <div
-                    role="img"
-                    aria-label={`${formatDayLabel(day.date)}: ${day.check_ins} check-ins`}
-                    className="flex min-h-0 flex-1 cursor-default items-end justify-center"
-                  >
-                    <div
-                      className={cn(
-                        "w-full max-w-[12px] rounded-sm transition-colors",
-                        day.check_ins > 0
-                          ? "bg-brand-primary/75"
-                          : "bg-border-subtle/90",
-                      )}
-                      style={{ height: `${height}%` }}
-                    />
-                  </div>
-                  <span
-                    className={cn(
-                      "flex h-5 items-center justify-center text-[9px] font-medium tracking-wide text-text-muted",
-                      !showLabel && "opacity-0",
-                    )}
-                  >
-                    {showLabel ? formatDayLabel(day.date) : "·"}
-                  </span>
-                  <span
-                    className="pointer-events-none absolute left-1/2 top-1 z-10 -translate-x-1/2 whitespace-nowrap rounded-md border border-border-subtle bg-bg-elevated px-2 py-1 text-[11px] text-text-primary opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
-                    aria-hidden
-                  >
-                    {formatDayLabel(day.date)} · {day.check_ins} check-in
-                    {day.check_ins === 1 ? "" : "s"}
-                  </span>
-                </div>
+                  heightPct={heightPct}
+                  maxBarWidth={12}
+                  barClassName={
+                    day.check_ins > 0
+                      ? "bg-brand-primary"
+                      : "bg-border-subtle"
+                  }
+                  label={dayLabel}
+                  showLabel={showLabel}
+                  ariaLabel={`${dayLabel}: ${day.check_ins} check-ins`}
+                  tooltip={`${dayLabel} · ${day.check_ins} check-in${day.check_ins === 1 ? "" : "s"}`}
+                />
               );
             })}
           </div>

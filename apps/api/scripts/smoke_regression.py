@@ -8,13 +8,22 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
-from app.services.pricing import MONTHLY_FULL_CENTS, WEEKLY_CENTS, price_offer
+from app.services.pricing import (
+    MONTHLY_FULL_CENTS,
+    WEEKLY_CENTS,
+    churn_probability_after_flex,
+    price_offer,
+)
 from app.services.regression import (
+    adjust_insights_for_applied_flex,
     build_member_insights,
     churn_probability_pct,
     linear_slope,
 )
-from app.services.value_projection import flex_worth_recommending, projection_for_offer
+from app.services.value_projection import (
+    flex_worth_recommending,
+    projection_from_breakdown,
+)
 
 
 def main() -> None:
@@ -89,6 +98,9 @@ def main() -> None:
     assert sarah["break_even_visits"] > sarah["expected_visits_per_week"]
     assert sarah["expected_visits_per_week"] == 1
     assert marcus["expected_visits_per_week"] == 2
+    assert sarah["expected_quit_months"] > 0
+    assert sarah["expected_flex_months"] > sarah["expected_quit_months"]
+    assert sarah["expected_quit_months"] != marcus["expected_quit_months"]
     assert sarah["estimated_weekly_cents"] == sarah["amount_cents"]
     assert (
         sarah["estimated_weekly_cents"]
@@ -105,23 +117,32 @@ def main() -> None:
     )
     assert "/week" in sarah["explanation"] or "/wk" in sarah["explanation"]
 
-    vp = projection_for_offer(
+    vp = projection_from_breakdown(
         risk_tier="critical",
         offer_slug="hold_plan",
         offer_type="plan_switch",
-        amount_cents=sarah["amount_cents"],
-        current_monthly_cents=sarah["current_monthly_cents"],
-        months_to_quit=sarah["months_to_quit"],
-        flex_retention_months=sarah["flex_retention_months"],
-        base_cents=sarah["base_weekly_cents"],
-        per_entry_cents=sarah["per_entry_cents"],
-        expected_visits=sarah["expected_visits_per_week"],
-        max_cap_weekly_cents=sarah["max_cap_weekly_cents"],
-        estimated_weekly_cents=sarah["estimated_weekly_cents"],
+        breakdown=sarah,
+    )
+    vp_marcus = projection_from_breakdown(
+        risk_tier="slipping",
+        offer_slug="hold_plan",
+        offer_type="plan_switch",
+        breakdown=marcus,
     )
     assert vp["series"]
     assert vp["current_plan_monthly_cents"] == MONTHLY_FULL_CENTS
     assert "/wk" in vp["flex_plan_label"]
+    assert vp["improvement_cents"] == vp["flex_total_cents"] - vp["current_total_cents"]
+    assert vp_marcus["improvement_cents"] == (
+        vp_marcus["flex_total_cents"] - vp_marcus["current_total_cents"]
+    )
+    assert vp["improvement_cents"] != vp_marcus["improvement_cents"]
+    last = vp["series"][-1]
+    assert last["current_cumulative_cents"] == vp["current_total_cents"]
+    assert last["flex_cumulative_cents"] == vp["flex_total_cents"]
+    last_m = vp_marcus["series"][-1]
+    assert last_m["current_cumulative_cents"] == vp_marcus["current_total_cents"]
+    assert last_m["flex_cumulative_cents"] == vp_marcus["flex_total_cents"]
 
     assert flex_worth_recommending({"improvement_cents": 1200}) is True
     assert flex_worth_recommending({"improvement_cents": 0}) is False
@@ -129,13 +150,31 @@ def main() -> None:
     assert flex_worth_recommending(None) is False
     assert flex_worth_recommending(vp) is (vp["improvement_cents"] > 0)
 
+    # Post-flex churn derived from retention lift (Jamie demo baseline 80% → 50%)
+    post_flex_80 = churn_probability_after_flex(baseline_churn_pct=80)
+    assert post_flex_80 == 50, f"expected 50% post-flex for 80% baseline, got {post_flex_80}"
+    assert post_flex_80 < 80
+    post_flex_slip = churn_probability_after_flex(baseline_churn_pct=slip)
+    assert post_flex_slip < slip
+
+    adjusted = adjust_insights_for_applied_flex(
+        insights_c,
+        baseline_churn_pct=80,
+        membership_plan="flex",
+    )
+    assert adjusted["churn_probability_baseline"] == 80
+    assert adjusted["churn_probability"] == 50
+    assert adjusted["churn_trend_label"] == "Stabilized with flex"
+    assert adjusted["ltv_cents"] > insights_c["ltv_cents"]
+    assert adjusted["risk_exposure_cents"] < insights_c["risk_exposure_cents"]
+
     print(
         f"OK critical={crit}% slipping={slip}% healthy={healthy}% "
         f"sarah={sarah['base_weekly_cents']}c/wk+{sarah['per_entry_cents']}c "
         f"cap={sarah['max_cap_weekly_cents']}c "
         f"marcus={marcus['base_weekly_cents']}c/wk+{marcus['per_entry_cents']}c "
         f"cap={marcus['max_cap_weekly_cents']}c "
-        f"improvement_cents={vp['improvement_cents']}"
+        f"sarah_imp={vp['improvement_cents']} marcus_imp={vp_marcus['improvement_cents']}"
     )
 
 

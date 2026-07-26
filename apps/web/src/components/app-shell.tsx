@@ -11,7 +11,6 @@ import {
   ClipboardList,
   Shield,
 } from "lucide-react";
-import { GYM_BADGE } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -70,9 +69,6 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     <div className="flex h-full flex-col">
       <div className="px-5 py-6">
         <Logo />
-        <div className="mt-4 inline-flex items-center rounded-full border border-border-subtle bg-bg-elevated px-2.5 py-1 text-[11px] font-medium text-text-secondary">
-          {GYM_BADGE}
-        </div>
       </div>
 
       <SidebarNav onNavigate={onNavigate} />

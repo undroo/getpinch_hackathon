@@ -20,9 +20,8 @@ from app.services.regression import (
 )
 from app.services.scorer import compute_risk_tier
 from app.services.value_projection import (
-    compute_value_projection,
     flex_worth_recommending,
-    projection_for_offer,
+    projection_from_breakdown,
 )
 
 router = APIRouter(prefix="/members", tags=["interventions"])
@@ -244,21 +243,11 @@ def _projection_from_breakdown(
     offer_type: str,
     breakdown: dict[str, Any],
 ) -> dict[str, Any]:
-    return projection_for_offer(
+    return projection_from_breakdown(
         risk_tier=risk_tier,
         offer_slug=offer_slug,
         offer_type=offer_type,
-        amount_cents=breakdown["amount_cents"],
-        current_monthly_cents=breakdown["current_monthly_cents"],
-        months_to_quit=breakdown["months_to_quit"],
-        flex_retention_months=breakdown["flex_retention_months"],
-        base_cents=breakdown.get("base_weekly_cents", breakdown.get("base_cents")),
-        per_entry_cents=breakdown.get("per_entry_cents"),
-        expected_visits=breakdown.get(
-            "expected_visits_per_week", breakdown.get("expected_visits")
-        ),
-        max_cap_weekly_cents=breakdown.get("max_cap_weekly_cents"),
-        estimated_weekly_cents=breakdown.get("estimated_weekly_cents"),
+        breakdown=breakdown,
     )
 
 
@@ -1057,30 +1046,17 @@ async def list_interventions(conn: asyncpg.Connection = Depends(get_db)) -> dict
                 risk_tier=risk_tier,
             )
 
-        # Prefer stored projection when present (applied-at economics).
+        # Prefer recomputed projection from pricing breakdown (member-specific economics).
         stored_vp = None
         if pinch_response and isinstance(pinch_response.get("value_projection"), dict):
             stored_vp = pinch_response["value_projection"]
 
-        value_projection = stored_vp or compute_value_projection(
+        value_projection = _projection_from_breakdown(
+            risk_tier=risk_tier,
             offer_slug=r["offer_slug"],
             offer_type=r["offer_type"],
-            current_monthly_cents=int(pricing_breakdown["current_monthly_cents"]),
-            months_to_quit=int(pricing_breakdown["months_to_quit"]),
-            flex_retention_months=int(pricing_breakdown["flex_retention_months"]),
-            amount_cents=int(pricing_breakdown["amount_cents"]),
-            base_cents=pricing_breakdown.get(
-                "base_weekly_cents", pricing_breakdown.get("base_cents")
-            ),
-            per_entry_cents=pricing_breakdown.get("per_entry_cents"),
-            expected_visits=pricing_breakdown.get(
-                "expected_visits_per_week",
-                pricing_breakdown.get("expected_visits"),
-            ),
-            max_cap_weekly_cents=pricing_breakdown.get("max_cap_weekly_cents"),
-            estimated_weekly_cents=pricing_breakdown.get("estimated_weekly_cents"),
-            risk_tier=risk_tier,
-        )
+            breakdown=pricing_breakdown,
+        ) if pricing_breakdown else stored_vp
 
         amount_cents = int(pricing_breakdown["amount_cents"])
         if pinch_response and pinch_response.get("recommended_amount_cents") is not None:

@@ -20,6 +20,8 @@ export interface MemberInsight {
   variant: DashboardVariant;
   memberCode: string;
   churnProbability: number;
+  /** Pre-flex churn at switch, when on applied flex plan */
+  churnProbabilityBaseline?: number;
   churnTrendLabel: string;
   engagementScore: number;
   engagementLabel: string;
@@ -141,6 +143,7 @@ export function buildDetailViewModel(detail: MemberDetail): MemberInsight {
     variant,
     memberCode: formatMemberCode(member.id, member.name),
     churnProbability: insights.churn_probability,
+    churnProbabilityBaseline: insights.churn_probability_baseline,
     churnTrendLabel: insights.churn_trend_label,
     engagementScore: insights.engagement_score,
     engagementLabel: insights.engagement_label,
@@ -173,7 +176,10 @@ export function buildDetailViewModel(detail: MemberDetail): MemberInsight {
       { key: "affinity", label: "Affinity", value: affinity },
     ],
     strategyCopy,
-    convertedFrom: "Standard",
+    convertedFrom:
+      insights.churn_probability_baseline != null
+        ? `Standard · ${insights.churn_probability_baseline}% churn at switch`
+        : "Standard",
     successCallout:
       tier === "healthy"
         ? `Engagement score ${insights.engagement_score}/100 · LTV forecast $${(insights.ltv_cents / 100).toFixed(0)}.`
@@ -183,6 +189,11 @@ export function buildDetailViewModel(detail: MemberDetail): MemberInsight {
         ? "Monitoring mode — no variable pricing offer until churn risk escalates."
         : null,
   };
+}
+
+export function formatFlexChurnDelta(insight: MemberInsight): string | null {
+  if (insight.churnProbabilityBaseline == null) return null;
+  return `${insight.churnProbabilityBaseline}% → ${insight.churnProbability}% at flex switch`;
 }
 
 export interface MonthBucket {

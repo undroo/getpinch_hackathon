@@ -36,18 +36,39 @@ def _round_dollars(cents: float) -> int:
     return int(round(cents / 100.0)) * 100
 
 
+def _churn_fraction(churn_probability_pct: int) -> float:
+    return _clamp_int(churn_probability_pct, 5, 95) / 100.0
+
+
+def expected_quit_months_float(*, churn_probability_pct: int) -> float:
+    """Fractional expected tenure on full price before quit (no integer rounding)."""
+    p = _churn_fraction(churn_probability_pct)
+    return max(1.0, min(float(HEALTHY_LTV_MONTHS), HEALTHY_LTV_MONTHS * (1.0 - p)))
+
+
+def expected_flex_months_float(*, churn_probability_pct: int) -> float:
+    """Fractional expected tenure on flex path with retention lift, capped at 12 months."""
+    quit_months = expected_quit_months_float(churn_probability_pct=churn_probability_pct)
+    flex_months = quit_months + (HEALTHY_LTV_MONTHS - quit_months) * RETENTION_LIFT
+    return max(quit_months + 1.0, min(12.0, flex_months))
+
+
 def estimate_quit_and_retention(*, churn_probability_pct: int) -> tuple[int, int]:
-    """Return (months_to_quit, flex_retention_months) capped to a 12-month horizon."""
-    p = _clamp_int(churn_probability_pct, 5, 95) / 100.0
-    months_to_quit = max(1, min(12, round(HEALTHY_LTV_MONTHS * (1.0 - p))))
-    flex_retention_months = max(
-        months_to_quit + 1,
-        min(
-            12,
-            round(months_to_quit + (HEALTHY_LTV_MONTHS - months_to_quit) * RETENTION_LIFT),
-        ),
-    )
+    """Return (months_to_quit, flex_retention_months) for UI labels."""
+    quit_float = expected_quit_months_float(churn_probability_pct=churn_probability_pct)
+    flex_float = expected_flex_months_float(churn_probability_pct=churn_probability_pct)
+    months_to_quit = max(1, min(12, round(quit_float)))
+    flex_retention_months = max(months_to_quit + 1, min(12, round(flex_float)))
     return months_to_quit, flex_retention_months
+
+
+def churn_probability_after_flex(*, baseline_churn_pct: int) -> int:
+    """Derive post-intervention churn from retention lift used in flex pricing."""
+    _, flex_retention_months = estimate_quit_and_retention(
+        churn_probability_pct=baseline_churn_pct,
+    )
+    p_flex = 1.0 - flex_retention_months / HEALTHY_LTV_MONTHS
+    return _clamp_int(int(round(p_flex * 100)), 5, 95)
 
 
 def _weekly_bill(
@@ -86,7 +107,7 @@ def price_offer(
         BASE_MAX_CENTS,
     )
     per_entry_cents = _clamp_int(
-        _round_dollars((WEEKLY_CENTS - base_weekly_cents) / break_even_visits),
+        int(round((WEEKLY_CENTS - base_weekly_cents) / break_even_visits)),
         ENTRY_MIN_CENTS,
         ENTRY_MAX_CENTS,
     )
@@ -106,7 +127,14 @@ def price_offer(
         raw_weekly = max(1, round(visits_30d / 4.0))
     else:
         raw_weekly = default_weekly
-    expected_visits = _clamp_int(raw_weekly, 1, max(1, break_even_visits - 1))
+    # Allow actual visit cadence up to break-even (not capped to break_even - 1)
+    expected_visits = _clamp_int(raw_weekly, 1, max(break_even_visits, 6))
+    expected_quit_months = expected_quit_months_float(
+        churn_probability_pct=churn_probability_pct
+    )
+    expected_flex_months = expected_flex_months_float(
+        churn_probability_pct=churn_probability_pct
+    )
 
     estimated_weekly_cents = _weekly_bill(
         base_weekly_cents=base_weekly_cents,
@@ -146,6 +174,8 @@ def price_offer(
         "weekly_rate_cents": WEEKLY_CENTS,
         "months_to_quit": months_to_quit,
         "flex_retention_months": flex_retention_months,
+        "expected_quit_months": round(expected_quit_months, 4),
+        "expected_flex_months": round(expected_flex_months, 4),
         "current_monthly_cents": MONTHLY_FULL_CENTS,
         "formula": formula,
         "explanation": explanation,

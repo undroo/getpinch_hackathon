@@ -11,6 +11,8 @@ export function StatCard({
   icon: Icon,
   tier,
   emphasized,
+  selected,
+  onClick,
 }: {
   label: string;
   value: number;
@@ -18,12 +20,33 @@ export function StatCard({
   icon: LucideIcon;
   tier: RiskTier;
   emphasized?: boolean;
+  selected?: boolean;
+  onClick?: () => void;
 }) {
+  const interactive = Boolean(onClick);
+
   return (
     <Card
+      role={interactive ? "button" : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      aria-pressed={interactive ? selected : undefined}
+      onClick={onClick}
+      onKeyDown={
+        interactive
+          ? (event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onClick?.();
+              }
+            }
+          : undefined
+      }
       className={cn(
         "relative overflow-hidden",
-        emphasized && "glow-critical border-[#ba1a1a]",
+        emphasized && !selected && "glow-critical border-[#ba1a1a]",
+        selected && "ring-2 ring-brand-primary border-brand-primary",
+        interactive &&
+          "cursor-pointer transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary",
       )}
     >
       <CardContent className="p-5 md:p-6">

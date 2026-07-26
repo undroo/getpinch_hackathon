@@ -400,3 +400,28 @@ def build_member_insights(
             _tenure_factor(tenure_days),
         ],
     }
+
+
+def adjust_insights_for_applied_flex(
+    insights: dict[str, Any],
+    *,
+    baseline_churn_pct: int,
+    membership_plan: str = "flex",
+) -> dict[str, Any]:
+    """Replace live churn with post-flex estimate for applied interventions."""
+    from app.services.pricing import churn_probability_after_flex
+
+    baseline = int(baseline_churn_pct)
+    post_flex = churn_probability_after_flex(baseline_churn_pct=baseline)
+    ltv_cents = compute_ltv(
+        churn_probability=post_flex,
+        membership_plan=membership_plan,
+    )
+    return {
+        **insights,
+        "churn_probability_baseline": baseline,
+        "churn_probability": post_flex,
+        "churn_trend_label": "Stabilized with flex",
+        "ltv_cents": ltv_cents,
+        "risk_exposure_cents": compute_risk_exposure_cents(ltv_cents=ltv_cents),
+    }

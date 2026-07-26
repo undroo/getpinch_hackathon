@@ -15,7 +15,7 @@ import asyncpg
 from app.config import settings
 from app.services.pricing import price_offer
 from app.services.scorer import compute_risk_tier
-from app.services.value_projection import projection_for_offer
+from app.services.value_projection import projection_from_breakdown
 
 # Fixed demo personas (same UUIDs as supabase/seed.sql)
 SARAH_ID = uuid.UUID("11111111-1111-1111-1111-111111111101")
@@ -393,19 +393,11 @@ async def _seed_interventions(
         visits_30d=0,
         risk_tier="critical",
     )
-    value_projection = projection_for_offer(
+    value_projection = projection_from_breakdown(
         risk_tier="critical",
         offer_slug="hold_plan",
         offer_type="plan_switch",
-        amount_cents=pricing_breakdown["amount_cents"],
-        current_monthly_cents=pricing_breakdown["current_monthly_cents"],
-        months_to_quit=pricing_breakdown["months_to_quit"],
-        flex_retention_months=pricing_breakdown["flex_retention_months"],
-        base_cents=pricing_breakdown["base_weekly_cents"],
-        per_entry_cents=pricing_breakdown["per_entry_cents"],
-        expected_visits=pricing_breakdown["expected_visits_per_week"],
-        max_cap_weekly_cents=pricing_breakdown["max_cap_weekly_cents"],
-        estimated_weekly_cents=pricing_breakdown["estimated_weekly_cents"],
+        breakdown=pricing_breakdown,
     )
     pinch_response = {
         "status": "demo",

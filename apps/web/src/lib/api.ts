@@ -201,6 +201,10 @@ function normalizeRiskFactor(raw: RiskFactor): RiskFactor {
 function normalizeInsights(raw: MemberInsights): MemberInsights {
   return {
     churn_probability: Number(raw.churn_probability) || 0,
+    churn_probability_baseline:
+      raw.churn_probability_baseline != null
+        ? Number(raw.churn_probability_baseline)
+        : undefined,
     churn_trend_label: raw.churn_trend_label ?? "",
     engagement_score: Number(raw.engagement_score) || 0,
     engagement_label: raw.engagement_label ?? "",

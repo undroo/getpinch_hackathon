@@ -63,6 +63,8 @@ export interface RiskFactor {
 
 export interface MemberInsights {
   churn_probability: number;
+  /** Pre-flex snapshot when member has an applied intervention */
+  churn_probability_baseline?: number;
   churn_trend_label: string;
   engagement_score: number;
   engagement_label: string;

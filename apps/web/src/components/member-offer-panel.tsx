@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { tierAccentClass } from "@/components/tier-badge";
-import type { MemberInsight } from "@/lib/member-insights";
+import { formatFlexChurnDelta, type MemberInsight } from "@/lib/member-insights";
 import type {
   ActiveIntervention,
   FlexPerformance,
@@ -630,6 +630,7 @@ export function MemberOfferPanel({
       : member.risk_tier === "watch"
         ? "Watch"
         : "Monitoring";
+  const flexChurnDelta = formatFlexChurnDelta(insight);
 
   return (
     <div className="space-y-4">
@@ -724,6 +725,9 @@ export function MemberOfferPanel({
                 style={{ width: `${insight.churnProbability}%` }}
               />
             </div>
+            {flexChurnDelta ? (
+              <p className="mt-1.5 text-xs text-text-muted">{flexChurnDelta}</p>
+            ) : null}
           </div>
           <div className="flex items-baseline justify-between gap-2 border-t border-border-subtle pt-3">
             <p className="text-xs text-text-muted">Projected LTV</p>

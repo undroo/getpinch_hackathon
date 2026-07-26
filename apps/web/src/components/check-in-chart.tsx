@@ -1,4 +1,5 @@
 import { Sparkles } from "lucide-react";
+import { BarChartColumn } from "@/components/bar-chart-column";
 import type { CheckIn, RiskTier } from "@/lib/types";
 import { monthlyCheckInBuckets } from "@/lib/member-insights";
 import { cn } from "@/lib/utils";
@@ -71,53 +72,39 @@ export function CheckInChart({
             <div className="h-5" aria-hidden />
           </div>
 
-          <div className="flex min-w-0 flex-1 gap-3 sm:gap-4">
+          <div className="flex h-full min-w-0 flex-1 gap-3 sm:gap-4">
             {months.map((month) => {
-              const height = Math.max(8, Math.round((month.count / max) * 100));
+              const heightPct = Math.max(
+                8,
+                Math.round((month.count / max) * 100),
+              );
               const emphasize =
                 highlightCurrent &&
                 (month.isCurrent || month.key === lowestKey) &&
                 (tier === "critical" || tier === "slipping");
 
               return (
-                <div
+                <BarChartColumn
                   key={month.key}
-                  className="group relative flex h-full min-w-0 flex-1 flex-col"
-                >
-                  <div
-                    role="img"
-                    aria-label={`${month.label}: ${month.count} check-ins`}
-                    className="flex min-h-0 flex-1 cursor-default items-end justify-center"
-                  >
-                    <div
-                      className={cn(
-                        "w-full max-w-[48px] rounded-sm transition-colors",
-                        emphasize
-                          ? tier === "critical"
-                            ? "bg-[var(--tier-critical-border)]/85"
-                            : "bg-[var(--tier-slipping-border)]/85"
-                          : month.count > 0
-                            ? "bg-brand-primary/75"
-                            : "bg-border-subtle/90",
-                      )}
-                      style={{ height: `${height}%` }}
-                    />
-                  </div>
-                  <span
-                    className={cn(
-                      "flex h-5 items-center justify-center text-[10px] font-medium tracking-wide",
-                      emphasize ? "text-text-primary" : "text-text-muted",
-                    )}
-                  >
-                    {month.label}
-                  </span>
-                  <span
-                    className="pointer-events-none absolute left-1/2 top-1 z-10 -translate-x-1/2 whitespace-nowrap rounded-md border border-border-subtle bg-bg-elevated px-2 py-1 text-[11px] text-text-primary opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
-                    aria-hidden
-                  >
-                    {month.count} check-in{month.count === 1 ? "" : "s"}
-                  </span>
-                </div>
+                  heightPct={heightPct}
+                  maxBarWidth={48}
+                  barClassName={
+                    emphasize
+                      ? tier === "critical"
+                        ? "bg-[var(--tier-critical-border)]"
+                        : "bg-[var(--tier-slipping-border)]"
+                      : month.count > 0
+                        ? "bg-brand-primary"
+                        : "bg-border-subtle"
+                  }
+                  label={month.label}
+                  labelClassName={cn(
+                    "text-[10px]",
+                    emphasize ? "text-text-primary" : "text-text-muted",
+                  )}
+                  ariaLabel={`${month.label}: ${month.count} check-ins`}
+                  tooltip={`${month.count} check-in${month.count === 1 ? "" : "s"}`}
+                />
               );
             })}
           </div>

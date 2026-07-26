@@ -7,9 +7,13 @@ from app.db import get_db
 from app.services.flex_performance import compute_flex_performance
 from app.services.intervention_state import fetch_active_intervention
 from app.services.pricing import price_offer
-from app.services.regression import build_member_insights
+from app.services.regression import adjust_insights_for_applied_flex, build_member_insights
 from app.services.scorer import OFFER_BY_TIER, compute_risk_tier, tier_severity
-from app.services.value_projection import flex_worth_recommending, projection_for_offer
+from app.services.value_projection import (
+    flex_worth_recommending,
+    projection_for_offer,
+    projection_from_breakdown,
+)
 
 router = APIRouter(prefix="/members", tags=["members"])
 
@@ -177,7 +181,17 @@ async def get_member(member_id: str, conn: asyncpg.Connection = Depends(get_db))
     membership_plan = row["membership_plan"] or "standard"
     if active_intervention:
         pricing_breakdown = active_intervention.get("pricing_breakdown")
-        value_projection = active_intervention.get("value_projection")
+        if isinstance(pricing_breakdown, dict):
+            offer_slug = active_intervention.get("offer_slug") or "hold_plan"
+            offer_type = active_intervention.get("offer_type") or "plan_switch"
+            value_projection = projection_from_breakdown(
+                risk_tier=tier,
+                offer_slug=offer_slug,
+                offer_type=offer_type,
+                breakdown=pricing_breakdown,
+            )
+        else:
+            value_projection = active_intervention.get("value_projection")
         if active_intervention.get("status") == "applied":
             applied_at_raw = active_intervention.get("accepted_at") or active_intervention[
                 "applied_at"
@@ -204,6 +218,21 @@ async def get_member(member_id: str, conn: asyncpg.Connection = Depends(get_db))
                     pricing_breakdown if isinstance(pricing_breakdown, dict) else None
                 ),
             )
+            if isinstance(pricing_breakdown, dict):
+                inputs = pricing_breakdown.get("inputs") or {}
+                baseline_churn = inputs.get("churn_probability_pct")
+                if baseline_churn is not None:
+                    insights = adjust_insights_for_applied_flex(
+                        insights,
+                        baseline_churn_pct=int(baseline_churn),
+                        membership_plan=membership_plan,
+                    )
+                else:
+                    insights = adjust_insights_for_applied_flex(
+                        insights,
+                        baseline_churn_pct=int(insights["churn_probability"]),
+                        membership_plan=membership_plan,
+                    )
     offer_slug = OFFER_BY_TIER.get(tier)
     if offer_slug and not active_intervention:
         offer_row = await conn.fetchrow(
@@ -244,6 +273,9 @@ async def get_member(member_id: str, conn: asyncpg.Connection = Depends(get_db))
                 expected_visits=pricing_breakdown["expected_visits_per_week"],
                 max_cap_weekly_cents=pricing_breakdown["max_cap_weekly_cents"],
                 estimated_weekly_cents=pricing_breakdown["estimated_weekly_cents"],
+                churn_probability_pct=int(insights["churn_probability"]),
+                expected_quit_months=pricing_breakdown.get("expected_quit_months"),
+                expected_flex_months=pricing_breakdown.get("expected_flex_months"),
             )
             if not flex_worth_recommending(value_projection):
                 suggested_offer = None

@@ -10,7 +10,7 @@ import { MemberOfferPanel } from "@/components/member-offer-panel";
 import { RiskFactors } from "@/components/risk-factors";
 import { tierNumberClass } from "@/components/tier-badge";
 import { Card, CardContent } from "@/components/ui/card";
-import type { MemberInsight } from "@/lib/member-insights";
+import { formatFlexChurnDelta, type MemberInsight } from "@/lib/member-insights";
 import type {
   ActiveIntervention,
   CheckIn,
@@ -60,6 +60,7 @@ export function MemberDetailInsights({
   const mode = modeForMetric(selectedMetric);
   const tierColor = tierNumberClass(member.risk_tier);
   const days = daysSinceVisit;
+  const flexChurnDelta = formatFlexChurnDelta(insight);
 
   return (
     <div className="space-y-8">
@@ -70,7 +71,13 @@ export function MemberDetailInsights({
         <MemberMetricCard
           label="60-Day Churn Probability"
           value={`${insight.churnProbability}%`}
-          sub={<span className={tierColor}>{insight.churnTrendLabel}</span>}
+          sub={
+            flexChurnDelta ? (
+              <span className="text-text-muted">{flexChurnDelta}</span>
+            ) : (
+              <span className={tierColor}>{insight.churnTrendLabel}</span>
+            )
+          }
           valueClassName={tierColor}
           emphasized={member.risk_tier === "critical"}
           ringPercent={insight.churnProbability}
