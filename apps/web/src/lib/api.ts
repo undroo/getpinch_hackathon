@@ -93,12 +93,7 @@ function normalizeOffer(
 
 interface MembersResponse {
   summary: OverviewSummary;
-  members: Array<
-    Omit<Member, "joined_at"> & {
-      joined_at?: string;
-      status?: string;
-    }
-  >;
+  members: Array<Member & { status?: string }>;
 }
 
 interface MemberDetailResponse {
@@ -367,7 +362,7 @@ export async function getMembers(params?: {
     days_since_last_visit: m.days_since_last_visit,
     membership_plan: m.membership_plan,
     pinch_payer_id: m.pinch_payer_id,
-    joined_at: m.joined_at ?? new Date().toISOString(),
+    joined_at: m.joined_at,
   }));
 
   const summary: OverviewSummary = {

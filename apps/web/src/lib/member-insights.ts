@@ -18,6 +18,7 @@ export interface LifecycleItem {
 
 export interface MemberInsight {
   variant: DashboardVariant;
+  /** Shortened real member UUID for display */
   memberCode: string;
   churnProbability: number;
   /** Pre-flex churn at switch, when on applied flex plan */
@@ -40,28 +41,13 @@ export interface MemberInsight {
   monitoringNote: string | null;
 }
 
-function hashString(input: string): number {
-  let h = 0;
-  for (let i = 0; i < input.length; i += 1) {
-    h = (h * 31 + input.charCodeAt(i)) >>> 0;
-  }
-  return h;
-}
-
 export function isAtRiskTier(tier: RiskTier): boolean {
   return tier === "critical" || tier === "slipping";
 }
 
-export function formatMemberCode(id: string, name: string): string {
-  const initials = name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase() ?? "")
-    .join("");
-  const digits = id.replace(/\D/g, "").slice(-4).padStart(4, "0");
-  const suffix = String((hashString(id) % 90) + 10).padStart(2, "0");
-  return `${initials || "MB"}-${digits}-${suffix}`;
+/** Shorten a real member UUID for display (first 8 hex chars). */
+export function formatMemberCode(id: string): string {
+  return id.replace(/-/g, "").slice(0, 8).toUpperCase();
 }
 
 function affinityFromVisits(visits: number): string {
@@ -141,7 +127,7 @@ export function buildDetailViewModel(detail: MemberDetail): MemberInsight {
 
   return {
     variant,
-    memberCode: formatMemberCode(member.id, member.name),
+    memberCode: formatMemberCode(member.id),
     churnProbability: insights.churn_probability,
     churnProbabilityBaseline: insights.churn_probability_baseline,
     churnTrendLabel: insights.churn_trend_label,
@@ -205,7 +191,7 @@ export interface MonthBucket {
 
 export function monthlyCheckInBuckets(
   checkIns: CheckIn[],
-  months = 6,
+  months = 3,
 ): MonthBucket[] {
   const now = new Date();
   const buckets: MonthBucket[] = [];

@@ -72,16 +72,10 @@ export function MembersTable({
               className={cn(
                 "group cursor-pointer border-l-[3px]",
                 tierAccentClass(member.risk_tier),
-                member.name === "Sarah Chen" && "bg-bg-elevated/40",
               )}
             >
               <TableCell>
-                <span
-                  className={cn(
-                    "font-medium text-text-primary group-hover:underline",
-                    member.name === "Sarah Chen" && "font-semibold",
-                  )}
-                >
+                <span className="font-medium text-text-primary group-hover:underline">
                   {member.name}
                 </span>
               </TableCell>

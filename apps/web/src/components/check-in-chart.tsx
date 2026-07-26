@@ -15,7 +15,7 @@ export function CheckInChart({
   callout?: string | null;
   highlightCurrent?: boolean;
 }) {
-  const months = monthlyCheckInBuckets(checkIns, 6);
+  const months = monthlyCheckInBuckets(checkIns, 3);
   const max = Math.max(1, ...months.map((m) => m.count));
   const yTicks = [...new Set([max, Math.round(max / 2), 0])].sort(
     (a, b) => b - a,
@@ -40,7 +40,7 @@ export function CheckInChart({
             Attendance Trend
           </p>
           <p className="mt-0.5 text-xs text-text-muted">
-            Check-ins per month · last 6 months
+            Check-ins per month · last 90 days
           </p>
         </div>
 

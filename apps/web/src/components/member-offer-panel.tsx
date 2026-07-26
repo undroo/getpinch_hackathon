@@ -526,7 +526,7 @@ export function MemberOfferPanel({
             {valueProjection ? (
               <div className="rounded-md border border-border-subtle bg-bg-base px-3 py-2.5 space-y-1.5">
                 <p className="text-[11px] uppercase tracking-wide text-text-muted">
-                  12-mo value
+                  {valueProjection.horizon_months}-mo value
                 </p>
                 <p className="text-sm text-text-primary">
                   <span className="font-medium tabular-nums">
@@ -608,7 +608,7 @@ export function MemberOfferPanel({
         </CardHeader>
         <CardContent>
           <p className="text-sm text-text-secondary">
-            Flex isn&apos;t recommended — the 12-month projection isn&apos;t
+            Flex isn&apos;t recommended — the value projection isn&apos;t
             better than the expected quit path. You can still take other
             retention actions outside RetainIQ+.
           </p>
@@ -684,12 +684,6 @@ export function MemberOfferPanel({
               <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.5} />
             </Link>
           </Button>
-
-          {member.risk_tier === "healthy" ? (
-            <p className="text-center text-xs text-brand-primary/90">
-              Upsell to Premium Flex
-            </p>
-          ) : null}
         </CardContent>
       </Card>
 

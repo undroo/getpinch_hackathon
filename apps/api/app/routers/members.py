@@ -114,6 +114,7 @@ async def list_members(
                 "pinch_payer_id": row["pinch_payer_id"],
                 "membership_plan": row["membership_plan"],
                 "status": row["status"],
+                "joined_at": row["joined_at"].isoformat(),
                 "risk_tier": tier,
                 "visits_30d": visits_30d,
                 "days_since_last_visit": days_since,

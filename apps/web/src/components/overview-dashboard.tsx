@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   AlertTriangle,
   CheckCircle2,
+  Eye,
   HelpCircle,
   TrendingDown,
 } from "lucide-react";
@@ -94,7 +95,7 @@ export function OverviewDashboard({
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard
           label="Critical"
           value={summary.critical}
@@ -113,6 +114,15 @@ export function OverviewDashboard({
           tier="slipping"
           selected={filter === "slipping"}
           onClick={() => toggleTier("slipping")}
+        />
+        <StatCard
+          label="Watch"
+          value={summary.watch}
+          subtext="Keep an eye on"
+          icon={Eye}
+          tier="watch"
+          selected={filter === "watch"}
+          onClick={() => toggleTier("watch")}
         />
         <StatCard
           label="Healthy"

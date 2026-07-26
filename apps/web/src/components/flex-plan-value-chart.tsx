@@ -69,7 +69,7 @@ export function FlexPlanValueChart({
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           className="h-44 w-full min-w-[280px]"
           role="img"
-          aria-label="12-month cumulative customer value comparison"
+          aria-label={`${projection.horizon_months}-month cumulative customer value comparison`}
         >
           {yTicks.map((tick) => (
             <g key={tick}>

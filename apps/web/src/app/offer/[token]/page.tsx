@@ -5,7 +5,14 @@ import { useParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { ApiError, getOffer } from "@/lib/api";
 import {
-  formatFlexEstimateLabel,
+  FLEX_HOW_IT_WORKS_DETAIL,
+  FLEX_HOW_IT_WORKS_HEADING,
+  FLEX_RANGE_TRUST_LINE,
+  FLEX_TYPICAL_SUBLINE,
+  flexOfferBenefits,
+  formatFlexTypicalHeroLabel,
+} from "@/lib/offer-copy";
+import {
   formatFlexFallbackWeeklyLabel,
   formatFlexStructureLabel,
   formatFlexWeeklyRangeLabel,
@@ -101,10 +108,10 @@ export default function MemberOfferPage() {
   const bd = offer.pricing_breakdown;
   const rangeLabel =
     offer.flex_weekly_range_label ?? formatFlexWeeklyRangeLabel(bd);
+  const typicalHero = formatFlexTypicalHeroLabel(bd);
   const structureLabel = formatFlexStructureLabel(bd);
-  const estimateLabel = formatFlexEstimateLabel(bd);
   const fallbackWeeklyLabel = formatFlexFallbackWeeklyLabel(bd);
-  const rationale = bd?.explanation?.trim() || offer.description;
+  const benefits = flexOfferBenefits(rangeLabel);
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col px-6 py-10">
@@ -115,22 +122,20 @@ export default function MemberOfferPage() {
         Your flex plan offer
       </h1>
       <p className="mt-3 text-sm leading-relaxed text-text-secondary">
-        Hi {offer.member_display_name} — stay with a casual price that scales
-        with how often you visit, instead of full unlimited.
+        Hi {offer.member_display_name} — keep your membership at a casual price
+        instead of full unlimited.
       </p>
 
-      <div className="mt-8 space-y-4 rounded-lg border border-border-subtle bg-bg-surface px-4 py-5">
-        {rangeLabel ? (
+      <div className="mt-8 space-y-5 rounded-lg border border-border-subtle bg-bg-surface px-4 py-5">
+        {typicalHero ? (
           <div>
             <p className="text-[11px] uppercase tracking-wide text-text-muted">
-              Your weekly range
+              Typical for you
             </p>
             <p className="mt-1 text-3xl font-semibold tracking-tight text-text-primary">
-              {rangeLabel}
+              {typicalHero}
             </p>
-            <p className="mt-1 text-xs text-text-muted">
-              Depending on how often you visit
-            </p>
+            <p className="mt-1 text-xs text-text-muted">{FLEX_TYPICAL_SUBLINE}</p>
           </div>
         ) : fallbackWeeklyLabel ? (
           <div>
@@ -143,51 +148,58 @@ export default function MemberOfferPage() {
           </div>
         ) : null}
 
+        {rangeLabel ? (
+          <div>
+            <p className="text-[11px] uppercase tracking-wide text-text-muted">
+              Your weekly range
+            </p>
+            <p className="mt-1 text-lg font-semibold text-text-primary">
+              {rangeLabel}
+            </p>
+            <p className="mt-1 text-xs text-text-muted">{FLEX_RANGE_TRUST_LINE}</p>
+          </div>
+        ) : null}
+
         {structureLabel ? (
           <div>
             <p className="text-[11px] uppercase tracking-wide text-text-muted">
-              How it’s calculated
+              {FLEX_HOW_IT_WORKS_HEADING}
             </p>
             <p className="mt-1 text-sm font-medium text-text-primary">
               {structureLabel}
             </p>
-          </div>
-        ) : null}
-
-        {estimateLabel ? (
-          <div>
-            <p className="text-[11px] uppercase tracking-wide text-text-muted">
-              Expected for you
-            </p>
-            <p className="mt-1 text-sm font-medium text-text-primary">
-              {estimateLabel}
-            </p>
+            <p className="mt-1 text-xs text-text-muted">{FLEX_HOW_IT_WORKS_DETAIL}</p>
           </div>
         ) : null}
 
         <div>
           <p className="text-[11px] uppercase tracking-wide text-text-muted">
-            Why this price
+            Why members choose flex
           </p>
-          <p className="mt-1 text-sm leading-relaxed text-text-secondary">
-            {rationale}
-          </p>
+          <ul className="mt-2 space-y-2 text-sm leading-relaxed text-text-secondary">
+            {benefits.map((benefit) => (
+              <li key={benefit} className="flex gap-2">
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-primary" />
+                <span>{benefit}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
 
       <>
         <p className="mt-6 text-sm leading-relaxed text-text-secondary">
-          Next, confirm your payment method (credit card or bank account). Your
-          weekly bill stays within{" "}
+          Next, confirm your payment method securely with Pinch.
           {rangeLabel ? (
-            <span className="font-medium text-text-primary">{rangeLabel}</span>
-          ) : (
-            "the range above"
-          )}{" "}
-          depending on how often you visit.
+            <>
+              {" "}
+              Your weekly bill stays within{" "}
+              <span className="font-medium text-text-primary">{rangeLabel}</span>.
+            </>
+          ) : null}
         </p>
         <Button asChild className="mt-4 w-full" size="lg">
-          <a href={`/offer/${token}/confirm`}>Confirm payment method</a>
+          <a href={`/offer/${token}/confirm`}>Accept flex plan</a>
         </Button>
       </>
 

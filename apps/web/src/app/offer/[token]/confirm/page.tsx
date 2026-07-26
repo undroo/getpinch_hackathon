@@ -17,12 +17,14 @@ import {
   PINCH_CAPTURE_SCRIPT,
 } from "@/lib/pinch-capture";
 import {
-  cn,
-  formatFlexEstimateLabel,
-  formatFlexPinchConfirmAmount,
-  formatFlexStructureLabel,
-  formatFlexWeeklyRangeLabel,
-} from "@/lib/utils";
+  FLEX_HOW_IT_WORKS_DETAIL,
+  FLEX_HOW_IT_WORKS_HEADING,
+  FLEX_RANGE_TRUST_LINE,
+  FLEX_TYPICAL_SUBLINE,
+  flexOfferBenefits,
+  formatFlexTypicalHeroLabel,
+} from "@/lib/offer-copy";
+import { cn, formatFlexStructureLabel, formatFlexWeeklyRangeLabel } from "@/lib/utils";
 import type { PublicOffer } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -192,9 +194,9 @@ export default function OfferConfirmPage() {
   const bd = offer.pricing_breakdown;
   const rangeLabel =
     offer.flex_weekly_range_label ?? formatFlexWeeklyRangeLabel(bd);
+  const typicalHero = formatFlexTypicalHeroLabel(bd);
   const structureLabel = formatFlexStructureLabel(bd);
-  const estimateLabel = formatFlexEstimateLabel(bd);
-  const baseFeeLabel = formatFlexPinchConfirmAmount(bd);
+  const benefits = flexOfferBenefits(rangeLabel);
 
   return (
     <Shell>
@@ -213,13 +215,36 @@ export default function OfferConfirmPage() {
       </p>
 
       <div className="mt-6 text-center">
-        {rangeLabel ? (
+        {typicalHero ? (
+          <>
+            <p className="text-[11px] uppercase tracking-wide text-text-muted">
+              Typical for you
+            </p>
+            <p className="mt-1 text-4xl font-semibold tracking-tight text-text-primary">
+              {typicalHero}
+            </p>
+            <p className="mt-2 text-sm text-text-secondary">{FLEX_TYPICAL_SUBLINE}</p>
+            {rangeLabel ? (
+              <>
+                <p className="mt-4 text-[11px] uppercase tracking-wide text-text-muted">
+                  Your weekly range
+                </p>
+                <p className="mt-1 text-lg font-semibold text-text-primary">
+                  {rangeLabel}
+                </p>
+                <p className="mt-1 text-sm text-text-secondary">
+                  {FLEX_RANGE_TRUST_LINE}
+                </p>
+              </>
+            ) : null}
+          </>
+        ) : rangeLabel ? (
           <>
             <p className="text-4xl font-semibold tracking-tight text-text-primary">
               {rangeLabel}
             </p>
             <p className="mt-2 text-sm text-text-secondary">
-              Weekly flex plan · bill varies with visits
+              {FLEX_RANGE_TRUST_LINE}
             </p>
           </>
         ) : (
@@ -229,37 +254,29 @@ export default function OfferConfirmPage() {
         )}
       </div>
 
-      <div className="mt-8 space-y-4 rounded-lg border border-border-subtle bg-bg-surface p-4 text-sm">
+      <div className="mt-8 space-y-5 rounded-lg border border-border-subtle bg-bg-surface p-4 text-sm">
         {structureLabel ? (
           <div>
             <p className="text-[11px] uppercase tracking-wide text-text-muted">
-              Description
+              {FLEX_HOW_IT_WORKS_HEADING}
             </p>
-            <p className="mt-1 text-text-primary">{structureLabel}</p>
+            <p className="mt-1 font-medium text-text-primary">{structureLabel}</p>
+            <p className="mt-1 text-xs text-text-muted">{FLEX_HOW_IT_WORKS_DETAIL}</p>
           </div>
         ) : null}
-        {rangeLabel ? (
-          <div>
-            <p className="text-[11px] uppercase tracking-wide text-text-muted">
-              Payment amount
-            </p>
-            <p className="mt-1 font-medium text-text-primary">{rangeLabel}</p>
-            {baseFeeLabel ? (
-              <p className="mt-1 text-xs text-text-secondary">
-                Billing uses your {baseFeeLabel}; per-visit charges apply when
-                you check in.
-              </p>
-            ) : null}
-          </div>
-        ) : null}
-        {estimateLabel ? (
-          <div>
-            <p className="text-[11px] uppercase tracking-wide text-text-muted">
-              Expected for you
-            </p>
-            <p className="mt-1 text-text-secondary">{estimateLabel}</p>
-          </div>
-        ) : null}
+        <div>
+          <p className="text-[11px] uppercase tracking-wide text-text-muted">
+            Why members choose flex
+          </p>
+          <ul className="mt-2 space-y-2 leading-relaxed text-text-secondary">
+            {benefits.map((benefit) => (
+              <li key={benefit} className="flex gap-2">
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-primary" />
+                <span>{benefit}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
       <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
@@ -356,7 +373,7 @@ export default function OfferConfirmPage() {
               Confirming…
             </>
           ) : (
-            "Review payment"
+            "Confirm payment"
           )}
         </Button>
       </form>
