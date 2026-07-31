@@ -29,8 +29,8 @@ export function OverviewPeakHoursChart({
   const labelHours = new Set([0, 6, 9, 12, 15, 18, 21]);
 
   return (
-    <Card>
-      <CardContent className="p-5 md:p-6">
+    <Card className="h-full">
+      <CardContent className="flex h-full flex-col p-5 md:p-6">
         <p className="text-sm font-medium text-text-secondary">Peak hours</p>
         <p className="mt-3 text-4xl font-bold tracking-tight tabular-nums text-text-primary md:text-5xl">
           {peak.check_ins > 0 ? formatHourLabel(peak.hour) : "—"}
@@ -42,7 +42,7 @@ export function OverviewPeakHoursChart({
             : ""}
         </p>
 
-        <div className="mt-5 flex h-40 gap-1.5 rounded-md border border-border-subtle bg-bg-base px-3 pb-2 pt-4 sm:gap-2 sm:px-4">
+        <div className="mt-auto flex h-40 gap-1.5 rounded-md border border-border-subtle bg-bg-base px-3 pb-2 pt-4 sm:gap-2 sm:px-4">
           <div className="flex w-5 shrink-0 flex-col">
             <div className="relative min-h-0 flex-1">
               {yTicks.map((tick) => {

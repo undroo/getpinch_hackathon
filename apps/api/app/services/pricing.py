@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+import math
 from typing import Any, Literal
 
 from app.services.regression import (
-    HEALTHY_LTV_MONTHS,
     MONTHLY_FULL_CENTS,
     WEEKLY_FULL_CENTS,
 )
@@ -14,6 +14,10 @@ AmountKind = Literal["base_plus_entry"]
 
 WEEKLY_CENTS = WEEKLY_FULL_CENTS  # $30/week unlimited reference (also min max-cap)
 RETENTION_LIFT = 0.45
+# Offer / value-projection horizon — quit & flex tenure are shown inside this window.
+OFFER_HORIZON_MONTHS = 12
+CHURN_WINDOW_DAYS = 60.0
+DAYS_PER_MONTH = 30.0
 
 # Weekly base bounds (casual flex, not flat monthly)
 BASE_MIN_CENTS = 1000  # $10/wk
@@ -41,25 +45,45 @@ def _churn_fraction(churn_probability_pct: int) -> float:
 
 
 def expected_quit_months_float(*, churn_probability_pct: int) -> float:
-    """Fractional expected tenure on full price before quit (no integer rounding)."""
+    """Expected remaining tenure from P(churn in 60d) via exponential survival.
+
+    If P is the probability of leaving within 60 days under constant hazard,
+    mean remaining days = 60 / -ln(1 − P). Converted to months and clamped to
+    the 12-month offer horizon so UI quit timing matches the 60-day KPI.
+    """
     p = _churn_fraction(churn_probability_pct)
-    return max(1.0, min(float(HEALTHY_LTV_MONTHS), HEALTHY_LTV_MONTHS * (1.0 - p)))
+    # p is clamped to [0.05, 0.95], so 1-p is safely in (0, 1)
+    expected_days = CHURN_WINDOW_DAYS / -math.log(1.0 - p)
+    return _clamp_float(expected_days / DAYS_PER_MONTH, 1.0, float(OFFER_HORIZON_MONTHS))
 
 
 def expected_flex_months_float(*, churn_probability_pct: int) -> float:
     """Fractional expected tenure on flex path with retention lift, capped at 12 months."""
     quit_months = expected_quit_months_float(churn_probability_pct=churn_probability_pct)
-    flex_months = quit_months + (HEALTHY_LTV_MONTHS - quit_months) * RETENTION_LIFT
-    return max(quit_months + 1.0, min(12.0, flex_months))
+    if quit_months >= float(OFFER_HORIZON_MONTHS):
+        return float(OFFER_HORIZON_MONTHS)
+    flex_months = quit_months + (OFFER_HORIZON_MONTHS - quit_months) * RETENTION_LIFT
+    return max(quit_months + 1.0, min(float(OFFER_HORIZON_MONTHS), flex_months))
 
 
 def estimate_quit_and_retention(*, churn_probability_pct: int) -> tuple[int, int]:
     """Return (months_to_quit, flex_retention_months) for UI labels."""
     quit_float = expected_quit_months_float(churn_probability_pct=churn_probability_pct)
     flex_float = expected_flex_months_float(churn_probability_pct=churn_probability_pct)
-    months_to_quit = max(1, min(12, round(quit_float)))
-    flex_retention_months = max(months_to_quit + 1, min(12, round(flex_float)))
+    months_to_quit = max(1, min(OFFER_HORIZON_MONTHS, round(quit_float)))
+    if months_to_quit >= OFFER_HORIZON_MONTHS:
+        return months_to_quit, OFFER_HORIZON_MONTHS
+    flex_retention_months = max(
+        months_to_quit + 1, min(OFFER_HORIZON_MONTHS, round(flex_float))
+    )
     return months_to_quit, flex_retention_months
+
+
+def _churn_pct_from_tenure_months(months: float) -> int:
+    """Invert exponential survival: P(churn in 60d) given expected tenure in months."""
+    days = max(DAYS_PER_MONTH, months * DAYS_PER_MONTH)
+    p = 1.0 - math.exp(-CHURN_WINDOW_DAYS / days)
+    return _clamp_int(int(round(p * 100)), 5, 95)
 
 
 def churn_probability_after_flex(*, baseline_churn_pct: int) -> int:
@@ -67,8 +91,7 @@ def churn_probability_after_flex(*, baseline_churn_pct: int) -> int:
     _, flex_retention_months = estimate_quit_and_retention(
         churn_probability_pct=baseline_churn_pct,
     )
-    p_flex = 1.0 - flex_retention_months / HEALTHY_LTV_MONTHS
-    return _clamp_int(int(round(p_flex * 100)), 5, 95)
+    return _churn_pct_from_tenure_months(float(flex_retention_months))
 
 
 def _weekly_bill(

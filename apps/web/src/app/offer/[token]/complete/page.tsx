@@ -40,8 +40,8 @@ export default function OfferCompletePage() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-6 py-12 text-center">
-      <span className="text-lg font-semibold tracking-tight text-text-primary">
-        Retain<span className="text-brand-primary">IQ+</span>
+      <span className="text-xl font-bold tracking-[-0.03em] text-text-primary">
+        Retain<span className="font-extrabold text-brand-primary">IQ+</span>
       </span>
 
       {state === "loading" ? (

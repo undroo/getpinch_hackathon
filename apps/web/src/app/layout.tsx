@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import { GeistMono } from "geist/font/mono";
-import { GeistSans } from "geist/font/sans";
 import { Toaster } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import "./globals.css";
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-plus-jakarta",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "RetainIQ+",
@@ -18,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${GeistSans.variable} ${GeistMono.variable} font-sans`}
+        className={`${plusJakarta.variable} ${GeistMono.variable} font-sans`}
       >
         <AppShell>{children}</AppShell>
         <Toaster
@@ -27,8 +33,8 @@ export default function RootLayout({
           toastOptions={{
             style: {
               background: "#ffffff",
-              border: "1px solid #e4e1e7",
-              color: "#1b1b1f",
+              border: "1px solid #d2dcda",
+              color: "#14201f",
             },
           }}
         />

@@ -16,13 +16,13 @@ The brand personality is **professional, precise, and high-performance**, tailor
 
 The design style is **Corporate Modern with Minimalist influences**. Clean aesthetic with generous whitespace, subtle depth through shadows, and a sophisticated color palette. The interface avoids unnecessary ornamentation, focusing on data density and user flow.
 
-**Branding is strictly typographic** — there is no logo icon. The wordmark **RetainIQ+** integrates directly into the system's high-end typography (`IQ+` in Iris Purple).
+**Branding is strictly typographic** — there is no logo icon. The wordmark **RetainIQ+** integrates directly into the system's high-end typography (`IQ+` in Deep Teal).
 
 | Attribute | Target |
 |---|---|
 | Tone | Confident, analytical, calm under pressure |
 | Density | Medium-high — lots of numbers, still scannable |
-| Motion | Minimal; loading skeletons and badge pulse on Critical only |
+| Motion | Minimal; page enter, chip transitions, badge pulse on Critical only |
 | Personality | Precision instrument, not playful |
 
 ### What to avoid
@@ -30,7 +30,8 @@ The design style is **Corporate Modern with Minimalist influences**. Clean aesth
 - Bright gym-neon gradients, muscle imagery, stock photos of treadmills
 - Dark "command center" themes — this is a light, premium B2B surface
 - Overly decorative illustrations or logo icons
-- Gradient primary buttons (use solid Iris Purple)
+- Purple / indigo / lavender AI-template palettes
+- Gradient primary buttons (use solid Deep Teal)
 
 ---
 
@@ -38,42 +39,42 @@ The design style is **Corporate Modern with Minimalist influences**. Clean aesth
 
 ### Core palette (light theme — primary)
 
-Foundation rests on a **soft white-to-grey gradient background** with **cool-toned neutrals**. Cards use pure white to pop against the subtle background.
+Foundation rests on a **cool mint-grey gradient background** with **teal-neutral surfaces**. Cards use pure white to pop against the subtle background.
 
 | Token | Hex | Usage |
 |---|---|---|
-| `background` / `bg-base` | `#FBF8FE` | Page background (surface) |
+| `background` / `bg-base` | `#F3F7F6` | Page background (surface) |
 | `bg-surface` | `#FFFFFF` | Cards, sidebar, table containers |
-| `bg-elevated` | `#F6F2F8` | Hover states, sidebar active, dropdown base |
-| `surface-container` | `#F0EDF2` | Gradient end, inset panels |
-| `surface-container-high` | `#EAE7ED` | Unknown tier badge bg |
-| `border-subtle` | `#E4E1E7` | Card borders, table dividers |
-| `border-card` | `#E2E2E9` | Level 1 elevation border (spec) |
-| `border-focus` | `#5442DE` | Input focus, active chip border |
-| `text-primary` / `on-surface` | `#1B1B1F` | Headings, primary labels |
-| `text-secondary` / `on-surface-variant` | `#474555` | Descriptions, column headers |
-| `text-muted` / `outline` | `#787586` | Timestamps, helper text |
-| `brand-primary` / `primary` | `#5442DE` | Iris Purple — CTAs, active nav, links |
-| `primary-container` | `#6D5EF8` | Emphasized primary surfaces |
+| `bg-elevated` | `#E7EFEE` | Hover states, sidebar active, dropdown base |
+| `surface-container` | `#E7EFEE` | Gradient end, inset panels |
+| `surface-container-high` | `#DCE6E4` | Unknown tier badge bg |
+| `border-subtle` | `#D2DCDA` | Card borders, table dividers |
+| `border-card` | `#D2DCDA` | Level 1 elevation border (spec) |
+| `border-focus` | `#0F6B66` | Input focus, active chip border |
+| `text-primary` / `on-surface` | `#14201F` | Headings, primary labels |
+| `text-secondary` / `on-surface-variant` | `#3D4F4D` | Descriptions, column headers |
+| `text-muted` / `outline` | `#6B7C7A` | Timestamps, helper text |
+| `brand-primary` / `primary` | `#0F6B66` | Deep Teal — CTAs, active nav, links |
+| `primary-container` | `#1A8A84` | Emphasized primary surfaces |
 | `brand-secondary` / `secondary` | `#006D36` | Soft Emerald Green — success, positive metrics |
 | `secondary-container` | `#83FBA5` | Success badge backgrounds |
 | `tertiary` | `#934900` | Offered/pending status |
 | `tertiary-container` | `#B85D00` | Tertiary emphasis |
 | `error` | `#BA1A1A` | Failed status, destructive |
 | `error-container` | `#FFDAD6` | Critical tier badge bg |
-| `outline-variant` | `#C8C4D8` | Unknown tier border |
+| `outline-variant` | `#A8B8B5` | Unknown tier border |
 
 ### Risk tier colors (semantic — consistent everywhere)
 
 Tier colors must read instantly on light backgrounds. Use **badge + left border + dot** together.
 
-| Tier | Label | Background | Text / border | Glow (optional) |
+| Tier | Label | Background | Text / border | Emphasis |
 |---|---|---|---|---|
-| **Critical** | High cancel risk | `#FFDAD6` | `#93000A` / `#BA1A1A` | `0 0 8px rgba(186,26,26,0.15)` |
-| **Slipping** | Likely to leave | `#FFDCC6` | `#713700` / `#934900` | `0 0 8px rgba(147,73,0,0.12)` |
+| **Critical** | High cancel risk | `#FFDAD6` | `#93000A` / `#BA1A1A` | Strong border (no decorative glow) |
+| **Slipping** | Likely to leave | `#FFDCC6` | `#713700` / `#934900` | Border emphasis |
 | **Healthy** | Low churn risk | `#83FBA5` | `#00743A` / `#006D36` | none |
-| **Watch** | At risk (watch) | `#F0EDF2` | `#474555` / `#787586` | none |
-| **Unknown** | Insufficient data | `#EAE7ED` | `#787586` / `#C8C4D8` | none |
+| **Watch** | At risk (watch) | `#E7EFEE` | `#3D4F4D` / `#6B7C7A` | none |
+| **Unknown** | Insufficient data | `#DCE6E4` | `#6B7C7A` / `#A8B8B5` | none |
 
 ### Status colors (interventions log)
 
@@ -88,7 +89,7 @@ Tier colors must read instantly on light backgrounds. Use **badge + left border 
 
 ## 3. Typography
 
-**Geist** exclusively. Geist's technical, monolinear construction reinforces the precise nature of the platform.
+**Plus Jakarta Sans** for UI and wordmark — geometric, high-legibility B2B type with more character than default AI stacks. **Geist Mono** for IDs and payloads.
 
 | Role | Token | Size / weight | Line height | Notes |
 |---|---|---|---|---|
@@ -147,11 +148,11 @@ Vertical rhythm: 8, 16, 24, 32, 48, 64px increments.
 
 ### Background
 
-Soft **white-to-grey vertical gradient** from `#FBF8FE` to `#F0EDF2` — premium feel, reduces screen fatigue in data-heavy views. No dot grid.
+Soft **cool mint-grey vertical gradient** from `#F3F7F6` to `#E7EFEE` — premium feel, reduces screen fatigue in data-heavy views. No dot grid.
 
 ### Logo treatment
 
-- Wordmark: **Retain** in `text-primary`; **IQ+** in `brand-primary` (Iris Purple).
+- Wordmark: **Retain** in `text-primary`; **IQ+** in `brand-primary` (Deep Teal).
 - No icon, no mark — typographic only.
 
 ---
@@ -192,10 +193,10 @@ Example: `Critical` on `#FFDAD6` with `#93000A` text and 1px `#BA1A1A` border.
 
 | Type | Style |
 |---|---|
-| **Primary** | Iris Purple (`#5442DE`) fill, white text, 8px radius |
+| **Primary** | Deep Teal (`#0F6B66`) fill, white text, 8px radius |
 | **Success** | Soft Emerald Green (`#006D36`) fill, white text |
 | **Secondary** | Transparent, `border-subtle` border, `text-primary` |
-| **Ghost** | No fill, Iris Purple or neutral text, subtle border on hover |
+| **Ghost** | No fill, Deep Teal or neutral text, subtle border on hover |
 | **Destructive** | Red outline only — rarely used |
 
 Primary CTA copy: **Send pricing offer**, **Preview in Pinch**, **Copy offer link**, **Confirm with Pinch** (member).
@@ -203,7 +204,7 @@ Primary CTA copy: **Send pricing offer**, **Preview in Pinch**, **Copy offer lin
 ### Input fields
 
 - Default: white background, 1px light grey border, 8px radius.
-- Focus: 1px Iris Purple border with subtle 2px purple outer glow (low opacity).
+- Focus: 1px Deep Teal border with subtle 2px teal outer ring (low opacity).
 - Icons: minimalist line icons (2px stroke) in medium grey.
 
 ### Chips & tags
@@ -238,10 +239,10 @@ Soft, desaturated accent backgrounds (e.g. light purple bg with dark purple text
 **Tier stat cards** (see §5) — Critical card slightly emphasized.
 
 **Attendance charts** (2-column row) — Mixpanel-style metric cards between KPIs and the table:
-- **Overall attendance** — large 30-day check-in total + daily bar chart (`brand-primary` bars).
+- **Average daily users** — yesterday’s unique members + vs 30-day / 6-month daily averages (green/red arrows) + daily unique-members bar chart (`brand-primary` bars).
 - **Peak hours** — busiest hour headline + 24-hour histogram; peak bar emphasized.
 
-**"Needs attention" table** — 5–8 rows; Sarah Chen first (Critical). View links in Iris Purple.
+**"Needs attention" table** — 5–8 rows; Sarah Chen first (Critical). View links in Deep Teal.
 
 ---
 
@@ -253,7 +254,7 @@ Search, filter chips (active chip: light purple bg + purple text), sort dropdown
 
 ### 6.3 Member detail — `/members/[id]`
 
-Two-column layout: check-in chart left, flex offer card right. Primary CTA: solid Iris Purple **Preview & send pricing offer**.
+Two-column layout: check-in chart left, flex offer card right. Primary CTA: solid Deep Teal **Preview & send pricing offer**.
 
 ---
 
@@ -297,7 +298,7 @@ No owner shell. Typographic **RetainIQ+** wordmark + gym name. Primary CTA: **Co
 | 0 — Background | Soft white-to-grey gradient |
 | 1 — Cards | Pure white + 1px `#E2E2E9` border |
 | 2 — Popovers | White + diffused shadow |
-| Interaction | Hover: slightly increased shadow or Iris Purple border tint |
+| Interaction | Hover: slightly increased shadow or Deep Teal border tint |
 
 ---
 
@@ -315,11 +316,11 @@ No owner shell. Typographic **RetainIQ+** wordmark + gym name. Primary CTA: **Co
 
 ### Master style suffix (append to all prompts)
 
-> Light premium B2B SaaS dashboard UI, Iris Purple (#5442DE) and Soft Emerald Green accents, Geist font, soft white-to-grey gradient background, white cards with subtle borders, crisp data tables, semantic red/amber/green risk badges on light backgrounds, no gym photography, no logo icons, typographic RetainIQ+ wordmark, professional corporate modern aesthetic, high fidelity, Figma-style mockup, 1440×900.
+> Light premium B2B SaaS dashboard UI, Deep Teal (#0F6B66) and Soft Emerald Green accents, Plus Jakarta Sans, cool mint-grey gradient background, white cards with subtle borders, crisp data tables, semantic red/amber/green risk badges on light backgrounds, no gym photography, no logo icons, typographic RetainIQ+ wordmark, professional corporate modern aesthetic, high fidelity, Figma-style mockup, 1440×900.
 
 ### Prompt A — Overview dashboard
 
-> RetainIQ+ gym retention pricing overview. Left sidebar, typographic wordmark. Four KPI stat cards: Critical 15, Slipping 25, Healthy 60, Unknown 5. "Needs attention" table below. Light theme, Iris Purple accents, white cards on soft gradient background.
+> RetainIQ+ gym retention pricing overview. Left sidebar, typographic wordmark. Four KPI stat cards: Critical 15, Slipping 25, Healthy 60, Unknown 5. "Needs attention" table below. Light theme, Deep Teal accents, white cards on cool mint-grey gradient background.
 
 ### Prompt B — Members list
 
@@ -331,7 +332,7 @@ No owner shell. Typographic **RetainIQ+** wordmark + gym name. Primary CTA: **Co
 
 ### Prompt D — Send offer modal
 
-> Modal on light dashboard. "Send Flex Plan", Pinch preview, Cancel and Send offer. RetainIQ+ branding, solid Iris Purple primary button.
+> Modal on light dashboard. "Send Flex Plan", Pinch preview, Cancel and Send offer. RetainIQ+ branding, solid Deep Teal primary button.
 
 ### Prompt E — Flex Plans log
 
@@ -350,7 +351,7 @@ When building in `apps/web`:
 - **Stack:** Next.js 15 + Tailwind + shadcn/ui
 - **CSS variables:** Map §2 tokens to `:root` in `globals.css` (keep semantic names: `bg-base`, `brand-primary`, etc.)
 - **Tier utilities:** `tier-critical`, `tier-slipping`, etc. as component classes in `globals.css`
-- **Fonts:** `geist` package — Geist Sans (+ Geist Mono for IDs)
+- **Fonts:** Plus Jakarta Sans via `next/font/google` (+ Geist Mono for IDs)
 - **Background:** `.bg-surface-gradient` utility replaces dark dot grid
 
 ### shadcn components
@@ -373,7 +374,7 @@ When building in `apps/web`:
 - [ ] Tier colors consistent across overview, members, detail
 - [ ] "Powered by Pinch" subtle footer in sidebar
 - [ ] No lorem ipsum — use realistic gym member names from seed data
-- [ ] Primary actions use solid Iris Purple button, not gradient
+- [ ] Primary actions use solid Deep Teal button, not gradient
 - [ ] Typographic RetainIQ+ wordmark — no logo icon
 
 ---

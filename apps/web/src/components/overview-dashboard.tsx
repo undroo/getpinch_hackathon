@@ -93,9 +93,9 @@ export function OverviewDashboard({
       {attendance ? (
         <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <OverviewAttendanceChart
-            totalCheckIns={attendance.total_check_ins}
-            uniqueMembers={attendance.unique_members}
-            windowDays={attendance.window_days}
+            yesterdayUniqueMembers={attendance.yesterday_unique_members}
+            avgDailyUsers30d={attendance.avg_daily_users_30d}
+            avgDailyUsers180d={attendance.avg_daily_users_180d}
             byDay={attendance.by_day}
           />
           <OverviewPeakHoursChart
@@ -108,7 +108,7 @@ export function OverviewDashboard({
           <Card>
             <CardContent className="p-5 md:p-6">
               <p className="text-sm font-medium text-text-secondary">
-                Overall attendance
+                Average daily users
               </p>
               <p className="mt-3 text-sm text-text-muted">
                 {attendanceError ??
@@ -134,7 +134,7 @@ export function OverviewDashboard({
         <StatCard
           label="Critical"
           value={summary.critical}
-          subtext="Needs action today"
+          subtext="Needs action"
           icon={AlertTriangle}
           tier="critical"
           emphasized

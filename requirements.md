@@ -311,9 +311,13 @@ max_cap_weekly = max(WEEKLY, round_dollars(WEEKLY × (1.15 + 0.20×(1-P))))
 
 expected_visits_per_week = clamp(round(visits_30d/4) or default, 1, break_even - 1)
 estimated_weekly = min(base_weekly + expected_visits × per_entry, max_cap_weekly)
+
+// Quit timing from P_churn_60d via exponential survival (not 24×(1−P))
+expected_quit_months = clamp(60 / -ln(1 − P) / 30, 1, 12)
+expected_flex_months = clamp(quit + (12 − quit) × 0.45, quit + 1, 12)
 ```
 
-Example: `$15/wk + $3/visit`, max cap `$40/wk` (cap must be ≥ `$30/wk`).
+Example: `$15/wk + $3/visit`, max cap `$40/wk` (cap must be ≥ `$30/wk`). Example tenure: **69% → ~2 mo** quit (was incorrectly ~7 mo under the old lifetime-share heuristic).
 
 API `pricing_breakdown` (weekly primary):
 
@@ -386,6 +390,8 @@ sequenceDiagram
 |---|---|
 | **Current (unlimited)** | Member pays `MONTHLY_FULL` ($30/week × 52/12) for `months_to_quit`, then $0 |
 | **Flex** | Weekly bill `min(base + visits×entry, max_cap)` rolled to monthly for `flex_retention_months`, then $0 |
+
+`months_to_quit` / LTV tenure are derived from `P_churn_60d` with exponential survival (`E[days] = 60 / -ln(1−P)`), clamped to the 12-month offer horizon — so the 60-day churn KPI and “leave in X mo” stay coherent.
 
 **API payloads:** Return `value_projection` + `pricing_breakdown` wherever an offer is suggested or previewed. UI shows `$X/wk + $Y/visit`, max cap, expected visits/wk.
 
@@ -720,13 +726,13 @@ Query params: `risk_tier` (optional), `sort` (`severity` | `name` | `last_visit`
     "amount_cents": 1900
   },
   "pricing_breakdown": {
-    "amount_cents": 1900,
-    "amount_kind": "monthly",
-    "months_to_quit": 4,
-    "flex_retention_months": 12,
-    "current_monthly_cents": 6900,
-    "formula": "hold_monthly = standard × (quit/flex) × 0.75",
-    "explanation": "Expected to leave in 4 months at $69/mo. Hold at $19/mo keeps them ~12 months.",
+    "amount_cents": 1800,
+    "amount_kind": "base_plus_entry",
+    "months_to_quit": 1,
+    "flex_retention_months": 6,
+    "current_monthly_cents": 13000,
+    "formula": "weekly: min(base + visits × per_entry, max_cap); quit = 60/-ln(1-P)/30",
+    "explanation": "Expected to leave in 1 month; flex keeps them ~6 months.",
     "inputs": {
       "churn_probability_pct": 84,
       "membership_plan": "standard",
@@ -738,8 +744,8 @@ Query params: `risk_tier` (optional), `sort` (`severity` | `name` | `last_visit`
     "churn_trend_label": "+18% vs last week",
     "engagement_score": 0,
     "engagement_label": "Bottom 5%",
-    "ltv_cents": 35600,
-    "risk_exposure_cents": 178000,
+    "ltv_cents": 13000,
+    "risk_exposure_cents": 299000,
     "visit_slope_90d": -0.42,
     "risk_factors": [
       {

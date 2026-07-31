@@ -48,9 +48,9 @@ export function FilterChips({
             type="button"
             onClick={() => toggle(value)}
             className={cn(
-              "rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
+              "rounded-md border px-3 py-1.5 text-xs font-semibold transition-colors duration-150",
               active
-                ? "border-brand-primary bg-brand-primary/15 text-brand-primary"
+                ? "border-brand-primary bg-brand-primary/12 text-brand-primary"
                 : "border-border-subtle bg-bg-surface text-text-secondary hover:border-border-focus hover:text-text-primary",
             )}
           >

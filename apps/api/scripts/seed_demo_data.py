@@ -278,40 +278,15 @@ def _generated_members(now: datetime, total_count: int) -> list[tuple[MemberRow,
     return members
 
 
-def _persona_check_ins(now: datetime) -> list[tuple[uuid.UUID, datetime]]:
-    check_ins: list[tuple[uuid.UUID, datetime]] = []
-
-    # Sarah Chen: Critical — 24 days inactive, was active in May/June
-    day = now - timedelta(days=75)
-    while day <= now - timedelta(days=55):
-        check_ins.append((SARAH_ID, day))
-        day += timedelta(days=2)
-    check_ins.append((SARAH_ID, now - timedelta(days=24)))
-
-    # Marcus Webb: Slipping — 16 days inactive
-    day = now - timedelta(days=60)
-    while day <= now - timedelta(days=30):
-        check_ins.append((MARCUS_ID, day))
-        day += timedelta(days=5)
-    check_ins.append((MARCUS_ID, now - timedelta(days=16)))
-
-    # Jamie Torres: Healthy on flex — regular visits since apply (~6 weeks)
-    for n in range(0, 42, 2):
-        check_ins.append((JAMIE_ID, now - timedelta(days=n) + timedelta(hours=8)))
-
-    # Avery Davis: Critical — 38 days inactive (~92% churn → leave in 2 months)
-    for visit_day in range(30, 81, 7):
-        hour = _demo_checkin_hour(7, 38 + visit_day)
-        check_ins.append(
-            (AVERY_ID, now - timedelta(days=38 + visit_day) + timedelta(hours=hour))
-        )
-    check_ins.append((AVERY_ID, now - timedelta(days=38) + timedelta(hours=8)))
-
-    return check_ins
+def _checkin_at(now: datetime, days_ago: int, hour: int, minute: int = 0) -> datetime:
+    """Build an absolute UTC timestamp on the calendar day `days_ago` at `hour`:`minute`."""
+    day = (now - timedelta(days=days_ago)).date()
+    return datetime(day.year, day.month, day.day, hour, minute, tzinfo=UTC)
 
 
-# Bimodal gym peaks (UTC hours matching seed "local" display): morning 7–10, evening 17–19.
-_PEAK_HOURS = (7, 8, 9, 10, 17, 18, 19)
+# Bimodal gym peaks (UTC hours matching seed "local" display).
+# Evening heavily weighted to 19 (7pm) so peak-hours headline lands there.
+_PEAK_HOURS = (7, 8, 9, 17, 18, 19, 19, 19, 19, 20)
 _OFF_PEAK_HOURS = (11, 12, 13, 14, 15, 16)
 
 
@@ -320,6 +295,47 @@ def _demo_checkin_hour(index: int, visit_day: int) -> int:
     if (index + visit_day) % 10 < 7:
         return _PEAK_HOURS[(index + visit_day) % len(_PEAK_HOURS)]
     return _OFF_PEAK_HOURS[(index + visit_day) % len(_OFF_PEAK_HOURS)]
+
+
+def _healthy_visits_on_day(index: int, visit_day: int, now: datetime) -> bool:
+    """Deterministic weekday/weekend cadence; always visit yesterday for most members."""
+    # Guarantee yesterday ADU is non-zero for a large healthy slice.
+    if visit_day == 1 and index % 10 < 8:
+        return True
+    day = (now - timedelta(days=visit_day)).date()
+    roll = (index * 17 + visit_day) % 10
+    # Saturday=5, Sunday=6 — lower weekend attendance.
+    if day.weekday() >= 5:
+        return roll < 4
+    return roll < 7
+
+
+def _persona_check_ins(now: datetime) -> list[tuple[uuid.UUID, datetime]]:
+    check_ins: list[tuple[uuid.UUID, datetime]] = []
+
+    # Sarah Chen: Critical — 24 days inactive, was active in May/June
+    for days_ago in range(55, 76, 2):
+        check_ins.append((SARAH_ID, _checkin_at(now, days_ago, 19, 15)))
+    check_ins.append((SARAH_ID, _checkin_at(now, 24, 18, 30)))
+
+    # Marcus Webb: Slipping — 16 days inactive
+    for days_ago in range(30, 61, 5):
+        check_ins.append((MARCUS_ID, _checkin_at(now, days_ago, 17, 45)))
+    check_ins.append((MARCUS_ID, _checkin_at(now, 16, 8, 10)))
+
+    # Jamie Torres: Healthy on flex — daily last 30d, then every 2 days to ~60d
+    for n in range(0, 30):
+        check_ins.append((JAMIE_ID, _checkin_at(now, n, 8, 0)))
+    for n in range(30, 61, 2):
+        check_ins.append((JAMIE_ID, _checkin_at(now, n, 8, 0)))
+
+    # Avery Davis: Critical — 38 days inactive (~92% churn → leave in 2 months)
+    for visit_day in range(30, 81, 7):
+        hour = _demo_checkin_hour(7, 38 + visit_day)
+        check_ins.append((AVERY_ID, _checkin_at(now, 38 + visit_day, hour, 20)))
+    check_ins.append((AVERY_ID, _checkin_at(now, 38, 8, 0)))
+
+    return check_ins
 
 
 def _check_ins_for_tier(
@@ -334,10 +350,24 @@ def _check_ins_for_tier(
     check_ins: list[tuple[uuid.UUID, datetime]] = []
 
     if tier == "healthy":
-        for visit_day in range(0, 28, 2):
+        # Weekday/weekend visit cadence so ADU chart varies; yesterday stays non-zero.
+        for visit_day in range(0, 30):
+            if not _healthy_visits_on_day(index, visit_day, now):
+                continue
             hour = _demo_checkin_hour(index, visit_day)
-            checkin_time = now - timedelta(days=visit_day) + timedelta(hours=hour)
-            check_ins.append((member.id, checkin_time))
+            minute = (index * 7 + visit_day * 3) % 60
+            checkin_time = _checkin_at(now, visit_day, hour, minute)
+            if checkin_time > member.joined_at:
+                check_ins.append((member.id, checkin_time))
+        # Sparse history to ~180d so 6-month avg is lower than recent 30d.
+        for visit_day in range(30, 181, 3):
+            if not _healthy_visits_on_day(index, visit_day, now):
+                continue
+            hour = _demo_checkin_hour(index, visit_day)
+            minute = (index * 7 + visit_day * 3) % 60
+            checkin_time = _checkin_at(now, visit_day, hour, minute)
+            if checkin_time > member.joined_at:
+                check_ins.append((member.id, checkin_time))
         return check_ins
 
     if tier == "slipping":
@@ -350,14 +380,14 @@ def _check_ins_for_tier(
         raise ValueError(f"Unsupported tier for check-ins: {tier}")
 
     hour = _demo_checkin_hour(index, last_visit_offset)
-    checkin_time = now - timedelta(days=last_visit_offset) + timedelta(hours=hour)
-    check_ins.append((member.id, checkin_time))
+    minute = (index * 7 + last_visit_offset * 3) % 60
+    check_ins.append((member.id, _checkin_at(now, last_visit_offset, hour, minute)))
 
     for visit_day in range(30, 81, 7):
-        hour = _demo_checkin_hour(index, last_visit_offset + visit_day)
-        checkin_time = (
-            now - timedelta(days=last_visit_offset + visit_day) + timedelta(hours=hour)
-        )
+        offset = last_visit_offset + visit_day
+        hour = _demo_checkin_hour(index, offset)
+        minute = (index * 7 + offset * 3) % 60
+        checkin_time = _checkin_at(now, offset, hour, minute)
         if checkin_time > member.joined_at:
             check_ins.append((member.id, checkin_time))
 

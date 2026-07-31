@@ -205,10 +205,17 @@ def compute_ltv(
     churn_probability: int,
     membership_plan: str = "standard",
 ) -> int:
-    """Projected LTV at the unlimited monthly rate for expected tenure."""
+    """Projected LTV at the unlimited monthly rate for expected tenure.
+
+    Tenure matches pricing quit months: exponential survival from P(churn in 60d).
+    """
     del membership_plan  # LTV is anchored to unlimited $30/wk, not plan tier
-    p = churn_probability / 100.0
-    expected_tenure_months = max(1, round(HEALTHY_LTV_MONTHS * (1.0 - p)))
+    # Lazy import avoids circular dependency (pricing imports constants from here).
+    from app.services.pricing import expected_quit_months_float
+
+    expected_tenure_months = max(
+        1, round(expected_quit_months_float(churn_probability_pct=churn_probability))
+    )
     return MONTHLY_FULL_CENTS * expected_tenure_months
 
 

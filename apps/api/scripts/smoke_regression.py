@@ -12,6 +12,8 @@ from app.services.pricing import (
     MONTHLY_FULL_CENTS,
     WEEKLY_CENTS,
     churn_probability_after_flex,
+    expected_flex_months_float,
+    expected_quit_months_float,
     price_offer,
 )
 from app.services.regression import (
@@ -101,6 +103,12 @@ def main() -> None:
     assert sarah["expected_quit_months"] > 0
     assert sarah["expected_flex_months"] > sarah["expected_quit_months"]
     assert sarah["expected_quit_months"] != marcus["expected_quit_months"]
+    # Survival tenure: 69% 60-day churn → ~1.7 mo (not the old 24×(1−P) ≈ 7 mo)
+    quit_69 = expected_quit_months_float(churn_probability_pct=69)
+    flex_69 = expected_flex_months_float(churn_probability_pct=69)
+    assert 1.5 <= quit_69 <= 2.5, f"69% quit months expected ~1.7–2, got {quit_69}"
+    assert flex_69 > quit_69
+    assert expected_quit_months_float(churn_probability_pct=90) <= 1.5
     assert sarah["estimated_weekly_cents"] == sarah["amount_cents"]
     assert (
         sarah["estimated_weekly_cents"]
@@ -150,9 +158,9 @@ def main() -> None:
     assert flex_worth_recommending(None) is False
     assert flex_worth_recommending(vp) is (vp["improvement_cents"] > 0)
 
-    # Post-flex churn derived from retention lift (Jamie demo baseline 80% → 50%)
+    # Post-flex churn from survival inverse of flex tenure (80% → ~28%)
     post_flex_80 = churn_probability_after_flex(baseline_churn_pct=80)
-    assert post_flex_80 == 50, f"expected 50% post-flex for 80% baseline, got {post_flex_80}"
+    assert post_flex_80 == 28, f"expected 28% post-flex for 80% baseline, got {post_flex_80}"
     assert post_flex_80 < 80
     post_flex_slip = churn_probability_after_flex(baseline_churn_pct=slip)
     assert post_flex_slip < slip
@@ -163,7 +171,7 @@ def main() -> None:
         membership_plan="flex",
     )
     assert adjusted["churn_probability_baseline"] == 80
-    assert adjusted["churn_probability"] == 50
+    assert adjusted["churn_probability"] == 28
     assert adjusted["churn_trend_label"] == "Stabilized with flex"
     assert adjusted["ltv_cents"] > insights_c["ltv_cents"]
     assert adjusted["risk_exposure_cents"] < insights_c["risk_exposure_cents"]

@@ -84,12 +84,12 @@ Created by `setup_pinch_sandbox.py` for bulk critical/slipping coverage. All hav
 |---|---|
 | Days since last visit | ~37 |
 | Churn probability | ~90% |
-| Expected leave | **2 mo** |
-| Flex stay | ~12 mo |
+| Expected leave | **1 mo** (from 60d P via exponential survival) |
+| Flex stay | ~6 mo |
 | Flex structure | $10/wk + $6.67/visit (cap $35/wk) |
 | Expected bill | ~$16.67/wk at 1 visit/wk |
-| LTV | ~$260 |
-| 12-mo value improvement | ~$555 |
+| LTV | ~$130 |
+| 12-mo value improvement | ~$300 |
 
 Direct link: http://localhost:3000/members/25a6d34c-46bc-4a4d-984e-121d47aeb9dd
 

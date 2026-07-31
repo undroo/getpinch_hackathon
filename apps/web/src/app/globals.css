@@ -3,15 +3,15 @@
 @tailwind utilities;
 
 :root {
-  --bg-base: #fbf8fe;
+  --bg-base: #f3f7f6;
   --bg-surface: #ffffff;
-  --bg-elevated: #f6f2f8;
-  --border-subtle: #e4e1e7;
-  --border-focus: #5442de;
-  --text-primary: #1b1b1f;
-  --text-secondary: #474555;
-  --text-muted: #787586;
-  --brand-primary: #5442de;
+  --bg-elevated: #e7efee;
+  --border-subtle: #d2dcda;
+  --border-focus: #0f6b66;
+  --text-primary: #14201f;
+  --text-secondary: #3d4f4d;
+  --text-muted: #6b7c7a;
+  --brand-primary: #0f6b66;
   --brand-secondary: #006d36;
 
   --tier-critical-bg: #ffdad6;
@@ -23,16 +23,17 @@
   --tier-healthy-bg: #83fba5;
   --tier-healthy-border: #006d36;
   --tier-healthy-text: #00743a;
-  --tier-watch-bg: #f0edf2;
-  --tier-watch-border: #787586;
-  --tier-watch-text: #474555;
-  --tier-unknown-bg: #eae7ed;
-  --tier-unknown-border: #c8c4d8;
-  --tier-unknown-text: #787586;
+  --tier-watch-bg: #e7efee;
+  --tier-watch-border: #6b7c7a;
+  --tier-watch-text: #3d4f4d;
+  --tier-unknown-bg: #dce6e4;
+  --tier-unknown-border: #a8b8b5;
+  --tier-unknown-text: #6b7c7a;
 
   --status-applied: #006d36;
   --status-pending: #934900;
   --status-failed: #ba1a1a;
+  --status-offered: #934900;
 
   --background: var(--bg-base);
   --foreground: var(--text-primary);
@@ -52,7 +53,7 @@
 
 @layer utilities {
   .bg-surface-gradient {
-    background: linear-gradient(180deg, #fbf8fe 0%, #f0edf2 100%);
+    background: linear-gradient(180deg, #f3f7f6 0%, #e7efee 100%);
   }
 
   .tier-critical {
@@ -85,11 +86,18 @@
     border-color: var(--tier-unknown-border);
   }
 
-  .glow-critical {
-    box-shadow: 0 0 8px rgba(186, 26, 26, 0.15);
+  .animate-page-enter {
+    animation: page-enter 280ms ease-out;
   }
+}
 
-  .glow-slipping {
-    box-shadow: 0 0 8px rgba(147, 73, 0, 0.12);
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

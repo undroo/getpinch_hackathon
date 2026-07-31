@@ -3,7 +3,7 @@
 
 INSERT INTO gym_config (gym_name, standard_plan_id, hold_plan_id, loyalty_plan_id, winback_amount_cents)
 VALUES (
-  'RetainIQ+ Demo Gym',
+  'GymPlus',
   'REPLACE_STANDARD_PLAN_ID',
   'REPLACE_HOLD_PLAN_ID',
   'REPLACE_LOYALTY_PLAN_ID',
@@ -54,6 +54,14 @@ DECLARE
   last_visit_offset INT;
   visit_day INT;
   checkin_time TIMESTAMPTZ;
+  hour_of_day INT;
+  minute_of_hour INT;
+  day_date DATE;
+  roll INT;
+  should_visit BOOLEAN;
+  -- Evening heavily weighted to 19 (7pm) so peak-hours headline lands there.
+  peak_hours INT[] := ARRAY[7, 8, 9, 17, 18, 19, 19, 19, 19, 20];
+  off_peak_hours INT[] := ARRAY[11, 12, 13, 14, 15, 16];
   first_names TEXT[] := ARRAY['Alex','Jordan','Taylor','Casey','Riley','Morgan','Quinn','Avery','Blake','Cameron','Drew','Elliot','Finley','Gray','Harper','Indigo','Jesse','Kai','Logan','Micah','Noah','Oakley','Parker','Reese','Sage','Tatum','Uma','Vale','Winter','Xander','Yael','Zion'];
   last_names TEXT[] := ARRAY['Smith','Johnson','Williams','Brown','Jones','Garcia','Miller','Davis','Rodriguez','Martinez','Lee','Walker','Hall','Allen','Young','King','Wright','Scott','Green','Baker'];
 BEGIN
@@ -93,18 +101,75 @@ BEGIN
     END IF;
 
     IF tier_roll <= 11 THEN
-      FOR visit_day IN 0..29 BY 3 LOOP
-        IF (visit_day + i) % 4 = 0 THEN
-          checkin_time := now() - (interval '1 day' * visit_day) + (interval '1 hour' * (8 + (i % 10)));
+      -- Weekday/weekend cadence so ADU chart varies; yesterday stays non-zero.
+      FOR visit_day IN 0..29 LOOP
+        day_date := (now() AT TIME ZONE 'UTC')::date - visit_day;
+        roll := (i * 17 + visit_day) % 10;
+        -- Match Python _healthy_visits_on_day
+        IF visit_day = 1 AND i % 10 < 8 THEN
+          should_visit := TRUE;
+        ELSIF EXTRACT(ISODOW FROM day_date) >= 6 THEN
+          should_visit := roll < 4;
+        ELSE
+          should_visit := roll < 7;
+        END IF;
+        IF NOT should_visit THEN
+          CONTINUE;
+        END IF;
+        IF (i + visit_day) % 10 < 7 THEN
+          hour_of_day := peak_hours[1 + ((i + visit_day) % array_length(peak_hours, 1))];
+        ELSE
+          hour_of_day := off_peak_hours[1 + ((i + visit_day) % array_length(off_peak_hours, 1))];
+        END IF;
+        minute_of_hour := (i * 7 + visit_day * 3) % 60;
+        checkin_time := (day_date + make_time(hour_of_day, minute_of_hour, 0)) AT TIME ZONE 'UTC';
+        IF checkin_time > joined THEN
+          INSERT INTO check_ins (member_id, checked_in_at, source) VALUES (member_uuid, checkin_time, 'mock');
+        END IF;
+      END LOOP;
+      -- Sparse history to ~180d so 6-month avg is lower than recent 30d.
+      FOR visit_day IN 30..179 BY 3 LOOP
+        day_date := (now() AT TIME ZONE 'UTC')::date - visit_day;
+        roll := (i * 17 + visit_day) % 10;
+        IF EXTRACT(ISODOW FROM day_date) >= 6 THEN
+          should_visit := roll < 4;
+        ELSE
+          should_visit := roll < 7;
+        END IF;
+        IF NOT should_visit THEN
+          CONTINUE;
+        END IF;
+        IF (i + visit_day) % 10 < 7 THEN
+          hour_of_day := peak_hours[1 + ((i + visit_day) % array_length(peak_hours, 1))];
+        ELSE
+          hour_of_day := off_peak_hours[1 + ((i + visit_day) % array_length(off_peak_hours, 1))];
+        END IF;
+        minute_of_hour := (i * 7 + visit_day * 3) % 60;
+        checkin_time := (day_date + make_time(hour_of_day, minute_of_hour, 0)) AT TIME ZONE 'UTC';
+        IF checkin_time > joined THEN
           INSERT INTO check_ins (member_id, checked_in_at, source) VALUES (member_uuid, checkin_time, 'mock');
         END IF;
       END LOOP;
     ELSE
-      checkin_time := now() - (interval '1 day' * last_visit_offset) + interval '9 hours';
+      day_date := (now() AT TIME ZONE 'UTC')::date - last_visit_offset;
+      IF (i + last_visit_offset) % 10 < 7 THEN
+        hour_of_day := peak_hours[1 + ((i + last_visit_offset) % array_length(peak_hours, 1))];
+      ELSE
+        hour_of_day := off_peak_hours[1 + ((i + last_visit_offset) % array_length(off_peak_hours, 1))];
+      END IF;
+      minute_of_hour := (i * 7 + last_visit_offset * 3) % 60;
+      checkin_time := (day_date + make_time(hour_of_day, minute_of_hour, 0)) AT TIME ZONE 'UTC';
       INSERT INTO check_ins (member_id, checked_in_at, source) VALUES (member_uuid, checkin_time, 'mock');
 
       FOR visit_day IN 30..80 BY 7 LOOP
-        checkin_time := now() - (interval '1 day' * (last_visit_offset + visit_day)) + interval '10 hours';
+        day_date := (now() AT TIME ZONE 'UTC')::date - (last_visit_offset + visit_day);
+        IF (i + last_visit_offset + visit_day) % 10 < 7 THEN
+          hour_of_day := peak_hours[1 + ((i + last_visit_offset + visit_day) % array_length(peak_hours, 1))];
+        ELSE
+          hour_of_day := off_peak_hours[1 + ((i + last_visit_offset + visit_day) % array_length(off_peak_hours, 1))];
+        END IF;
+        minute_of_hour := (i * 7 + (last_visit_offset + visit_day) * 3) % 60;
+        checkin_time := (day_date + make_time(hour_of_day, minute_of_hour, 0)) AT TIME ZONE 'UTC';
         IF checkin_time > joined THEN
           INSERT INTO check_ins (member_id, checked_in_at, source) VALUES (member_uuid, checkin_time, 'mock');
         END IF;
@@ -115,29 +180,45 @@ END $$;
 
 -- Sarah Chen: Critical — 24 days inactive, was active in May/June
 INSERT INTO check_ins (member_id, checked_in_at, source)
-SELECT '11111111-1111-1111-1111-111111111101', d, 'mock'
-FROM generate_series(
-  now() - interval '75 days',
-  now() - interval '55 days',
-  interval '2 days'
-) AS d;
+SELECT
+  '11111111-1111-1111-1111-111111111101',
+  (((now() AT TIME ZONE 'UTC')::date - n) + time '19:15') AT TIME ZONE 'UTC',
+  'mock'
+FROM generate_series(55, 75, 2) AS n;
 
 INSERT INTO check_ins (member_id, checked_in_at, source)
-VALUES ('11111111-1111-1111-1111-111111111101', now() - interval '24 days', 'mock');
+VALUES (
+  '11111111-1111-1111-1111-111111111101',
+  (((now() AT TIME ZONE 'UTC')::date - 24) + time '18:30') AT TIME ZONE 'UTC',
+  'mock'
+);
 
 -- Marcus Webb: Slipping — 16 days inactive
 INSERT INTO check_ins (member_id, checked_in_at, source)
-SELECT '11111111-1111-1111-1111-111111111102', d, 'mock'
-FROM generate_series(
-  now() - interval '60 days',
-  now() - interval '30 days',
-  interval '5 days'
-) AS d;
+SELECT
+  '11111111-1111-1111-1111-111111111102',
+  (((now() AT TIME ZONE 'UTC')::date - n) + time '17:45') AT TIME ZONE 'UTC',
+  'mock'
+FROM generate_series(30, 60, 5) AS n;
 
 INSERT INTO check_ins (member_id, checked_in_at, source)
-VALUES ('11111111-1111-1111-1111-111111111102', now() - interval '16 days', 'mock');
+VALUES (
+  '11111111-1111-1111-1111-111111111102',
+  (((now() AT TIME ZONE 'UTC')::date - 16) + time '08:10') AT TIME ZONE 'UTC',
+  'mock'
+);
 
--- Jamie Torres: Healthy — 12+ visits in last 30 days
+-- Jamie Torres: Healthy — daily last 30d, then every 2 days to ~60d
 INSERT INTO check_ins (member_id, checked_in_at, source)
-SELECT '11111111-1111-1111-1111-111111111103', now() - (interval '1 day' * n) + interval '8 hours', 'mock'
-FROM generate_series(0, 27, 2) AS n;
+SELECT
+  '11111111-1111-1111-1111-111111111103',
+  (((now() AT TIME ZONE 'UTC')::date - n) + time '08:00') AT TIME ZONE 'UTC',
+  'mock'
+FROM generate_series(0, 29, 1) AS n;
+
+INSERT INTO check_ins (member_id, checked_in_at, source)
+SELECT
+  '11111111-1111-1111-1111-111111111103',
+  (((now() AT TIME ZONE 'UTC')::date - n) + time '08:00') AT TIME ZONE 'UTC',
+  'mock'
+FROM generate_series(30, 60, 2) AS n;

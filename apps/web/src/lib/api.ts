@@ -326,6 +326,9 @@ export async function getAttendanceStats(): Promise<AttendanceStats> {
     window_days: data.window_days ?? 30,
     total_check_ins: data.total_check_ins ?? 0,
     unique_members: data.unique_members ?? 0,
+    yesterday_unique_members: data.yesterday_unique_members ?? 0,
+    avg_daily_users_30d: data.avg_daily_users_30d ?? 0,
+    avg_daily_users_180d: data.avg_daily_users_180d ?? 0,
     by_day: (data.by_day ?? []).map((d) => ({
       date: d.date,
       check_ins: d.check_ins ?? 0,

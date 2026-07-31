@@ -3,16 +3,16 @@ import { cn } from "@/lib/utils";
 import type { RiskFactor, RiskFactorLevel } from "@/lib/types";
 
 const LEVEL_BAR: Record<RiskFactorLevel, string> = {
-  critical: "bg-[#EF4444]",
-  high: "bg-[#A78BFA]",
+  critical: "bg-status-failed",
+  high: "bg-[var(--tier-slipping-border)]",
   stable: "bg-brand-primary",
   neutral: "bg-text-muted",
-  low: "bg-[#22C55E]",
+  low: "bg-brand-secondary",
 };
 
 const LEVEL_TEXT: Record<RiskFactorLevel, string> = {
   critical: "text-[var(--tier-critical-text)]",
-  high: "text-[#C4B5FD]",
+  high: "text-[var(--tier-slipping-text)]",
   stable: "text-brand-primary",
   neutral: "text-text-secondary",
   low: "text-[var(--tier-healthy-text)]",
@@ -46,10 +46,10 @@ export function RiskFactors({ factors }: { factors: RiskFactor[] }) {
               <p className="text-xs leading-relaxed text-text-secondary">
                 {factor.description}
               </p>
-              <div className="h-1.5 overflow-hidden rounded-full bg-border-subtle">
+              <div className="h-1.5 overflow-hidden rounded-sm bg-border-subtle">
                 <div
                   className={cn(
-                    "h-full rounded-full transition-all",
+                    "h-full rounded-sm transition-all",
                     LEVEL_BAR[factor.level],
                   )}
                   style={{ width: `${factor.severity}%` }}

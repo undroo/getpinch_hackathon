@@ -166,6 +166,9 @@ export interface AttendanceStats {
   window_days: number;
   total_check_ins: number;
   unique_members: number;
+  yesterday_unique_members: number;
+  avg_daily_users_30d: number;
+  avg_daily_users_180d: number;
   by_day: AttendanceDayBucket[];
   by_hour: AttendanceHourBucket[];
 }

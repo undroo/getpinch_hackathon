@@ -42,11 +42,11 @@ export function StatCard({
           : undefined
       }
       className={cn(
-        "relative overflow-hidden",
-        emphasized && !selected && "glow-critical border-[#ba1a1a]",
-        selected && "ring-2 ring-brand-primary border-brand-primary",
+        "relative overflow-hidden transition-colors duration-150",
+        emphasized && !selected && "border-[var(--tier-critical-border)]",
+        selected && "border-brand-primary ring-2 ring-brand-primary/40",
         interactive &&
-          "cursor-pointer transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary",
+          "cursor-pointer hover:border-border-focus focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/50",
       )}
     >
       <CardContent className="p-5 md:p-6">

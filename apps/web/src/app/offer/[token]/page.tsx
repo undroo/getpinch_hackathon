@@ -18,6 +18,7 @@ import {
   formatFlexWeeklyRangeLabel,
 } from "@/lib/utils";
 import type { PublicOffer } from "@/lib/types";
+import { GYM_NAME } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 
 export default function MemberOfferPage() {
@@ -85,7 +86,7 @@ export default function MemberOfferPage() {
         </h1>
         <p className="mt-3 text-sm text-text-secondary">
           Thanks {offer.member_display_name} — your flex plan is active with{" "}
-          {offer.gym_name}.
+          {GYM_NAME}.
         </p>
       </div>
     );
@@ -116,7 +117,7 @@ export default function MemberOfferPage() {
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col px-6 py-10">
       <BrandMark />
-      <p className="mt-3 text-xs text-text-muted">{offer.gym_name}</p>
+      <p className="mt-3 text-xs text-text-muted">{GYM_NAME}</p>
 
       <h1 className="mt-10 text-3xl font-semibold tracking-tight text-text-primary">
         Your flex plan offer
@@ -213,8 +214,8 @@ export default function MemberOfferPage() {
 
 function BrandMark() {
   return (
-    <span className="text-lg font-semibold tracking-tight text-text-primary">
-      Retain<span className="text-brand-primary">IQ+</span>
+    <span className="text-xl font-bold tracking-[-0.03em] text-text-primary">
+      Retain<span className="font-extrabold text-brand-primary">IQ+</span>
     </span>
   );
 }

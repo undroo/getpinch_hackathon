@@ -1,4 +1,5 @@
 import { OverviewDashboard } from "@/components/overview-dashboard";
+import { PageHeader } from "@/components/page-header";
 import { getAttendanceStats, getMembers } from "@/lib/api";
 import type { AttendanceStats, Member } from "@/lib/types";
 import { GYM_NAME } from "@/lib/constants";
@@ -45,17 +46,15 @@ export default async function OverviewPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-[28px] font-semibold tracking-[-0.02em] text-text-primary md:text-[32px]">
-            Retention pricing overview
-          </h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            {GYM_NAME} · {summary.total_scored} members scored ·{" "}
-            {attentionCount} expected to leave
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow="Overview"
+        title=""
+        description={
+          <>
+            {GYM_NAME} · {summary.total_scored} members scored
+          </>
+        }
+      />
 
       <OverviewDashboard
         summary={summary}

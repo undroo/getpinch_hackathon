@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     pinch_payer_avery: str = ""
     pinch_webhook_secret: str = ""
     cors_origins: str = "http://localhost:3000"
-    demo_gym_name: str = "RetainIQ+ Demo Gym"
+    demo_gym_name: str = "GymPlus"
     web_app_url: str = "http://localhost:3000"
 
     def offer_url(self, token: str) -> str:

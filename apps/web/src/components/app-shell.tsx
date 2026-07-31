@@ -12,6 +12,7 @@ import {
   Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { GYM_NAME } from "@/lib/constants";
 
 const NAV = [
   { href: "/", label: "Overview", icon: LayoutDashboard },
@@ -27,8 +28,11 @@ function isActive(pathname: string, href: string): boolean {
 
 function Logo() {
   return (
-    <Link href="/" className="text-lg font-semibold tracking-tight text-text-primary">
-      Retain<span className="text-brand-primary">IQ+</span>
+    <Link
+      href="/"
+      className="text-xl font-bold tracking-[-0.03em] text-text-primary"
+    >
+      Retain<span className="font-extrabold text-brand-primary">IQ+</span>
     </Link>
   );
 }
@@ -46,16 +50,22 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
             href={href}
             onClick={onNavigate}
             className={cn(
-              "relative flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
+              "relative flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors duration-150",
               active
                 ? "bg-bg-elevated text-text-primary"
                 : "text-text-secondary hover:bg-bg-elevated/60 hover:text-text-primary",
             )}
           >
             {active && (
-              <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-brand-primary" />
+              <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-sm bg-brand-primary" />
             )}
-            <Icon className="h-4 w-4" strokeWidth={1.5} />
+            <Icon
+              className={cn(
+                "h-4 w-4 transition-colors",
+                active ? "text-brand-primary" : undefined,
+              )}
+              strokeWidth={1.5}
+            />
             {label}
           </Link>
         );
@@ -74,7 +84,10 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       <SidebarNav onNavigate={onNavigate} />
 
       <div className="mt-auto border-t border-border-subtle px-5 py-4">
-        <p className="text-xs text-text-muted">Powered by Pinch</p>
+        <p className="truncate text-xs font-medium text-text-secondary">
+          {GYM_NAME}
+        </p>
+        <p className="mt-1 text-[11px] text-text-muted">Powered by Pinch</p>
       </div>
     </div>
   );
@@ -133,7 +146,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Logo />
         </header>
 
-        <main className="mx-auto w-full max-w-content px-4 py-6 md:px-8 md:py-8">
+        <main
+          key={pathname}
+          className="animate-page-enter mx-auto w-full max-w-content px-4 py-6 md:px-8 md:py-8"
+        >
           {children}
         </main>
       </div>

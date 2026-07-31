@@ -30,16 +30,16 @@ export function TierBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold",
+        "inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold",
         TIER_CLASS[tier],
-        tier === "critical" && "glow-critical",
         className,
       )}
     >
       <span
         className={cn(
-          "h-1.5 w-1.5 rounded-full",
-          tier === "critical" && "bg-[var(--tier-critical-border)]",
+          "h-1.5 w-1.5 rounded-sm",
+          tier === "critical" &&
+            "animate-pulse bg-[var(--tier-critical-border)]",
           tier === "slipping" && "bg-[var(--tier-slipping-border)]",
           tier === "healthy" && "bg-[var(--tier-healthy-border)]",
           tier === "watch" && "bg-[var(--tier-watch-border)]",

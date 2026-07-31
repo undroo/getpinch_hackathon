@@ -35,7 +35,7 @@ export function MemberMetricCard({
 
   const cardClassName = cn(
     "relative overflow-hidden text-left transition-colors",
-    emphasized && !selected && "glow-critical border-[#7F1D1D]",
+    emphasized && !selected && "border-[var(--tier-critical-border)]",
     selected &&
       "border-brand-primary bg-bg-elevated ring-1 ring-brand-primary/40",
     interactive &&

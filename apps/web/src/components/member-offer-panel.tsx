@@ -708,13 +708,13 @@ export function MemberOfferPanel({
                 {insight.churnProbability}%
               </p>
             </div>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-border-subtle">
+            <div className="mt-2 h-1.5 overflow-hidden rounded-sm bg-border-subtle">
               <div
                 className={cn(
-                  "h-full rounded-full",
+                  "h-full rounded-sm",
                   insight.churnProbability >= 50
-                    ? "bg-[#EF4444]"
-                    : "bg-[#22C55E]",
+                    ? "bg-status-failed"
+                    : "bg-brand-secondary",
                 )}
                 style={{ width: `${insight.churnProbability}%` }}
               />

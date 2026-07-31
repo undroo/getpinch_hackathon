@@ -5,7 +5,7 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 CREATE TABLE gym_config (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  gym_name TEXT NOT NULL DEFAULT 'RetainIQ+ Demo Gym',
+  gym_name TEXT NOT NULL DEFAULT 'GymPlus',
   standard_plan_id TEXT,
   hold_plan_id TEXT,
   loyalty_plan_id TEXT,

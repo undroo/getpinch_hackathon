@@ -22,12 +22,13 @@ const config: Config = {
         "status-applied": "var(--status-applied)",
         "status-pending": "var(--status-pending)",
         "status-failed": "var(--status-failed)",
+        "status-offered": "var(--status-offered)",
         primary: "var(--brand-primary)",
         secondary: "var(--brand-secondary)",
         error: "var(--status-failed)",
       },
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+        sans: ["var(--font-plus-jakarta)", "system-ui", "sans-serif"],
         mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
       },
       borderRadius: {

@@ -388,8 +388,8 @@ export default function OfferConfirmPage() {
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col px-6 py-10">
-      <span className="text-lg font-semibold tracking-tight text-text-primary">
-        Retain<span className="text-brand-primary">IQ+</span>
+      <span className="text-xl font-bold tracking-[-0.03em] text-text-primary">
+        Retain<span className="font-extrabold text-brand-primary">IQ+</span>
       </span>
       <div className="mt-8">{children}</div>
     </div>
